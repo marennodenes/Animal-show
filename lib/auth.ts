@@ -3,10 +3,10 @@
  **/
 
 import { createClient } from "@/utils/supabase/client";
-const supabase = createClient();
+
 
 export async function login({ email, password }: { email: string; password: string }) {
-  
+  const supabase = createClient();
   
   const {data,error} = await supabase.auth.signInWithPassword({email,password});
 
@@ -18,7 +18,8 @@ export async function login({ email, password }: { email: string; password: stri
 }
 
 export async function register({ email, password}: { email: string; password: string}) {
-  
+  const supabase = createClient();
+
   const {data, error} = await supabase.auth.signUp({email,password});
 
   if (error) {
