@@ -5,11 +5,11 @@ import { login } from '@/lib/auth';
 
 /**
  * Login form component
- * Handles user authentication with username and password
+ * Handles user authentication with email and password
  * @author marennod
  */
 export default function LoginForm() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,12 +24,12 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const result = await login({ username, password });
+      const result = await login({ email, password });
 
       if (result.success) {
         // successful login
         console.log('Innlogget som:', result.user);
-        alert(`Velkommen, ${result.user?.username}!`);
+        alert(`Velkommen, ${result.user?.email}!`);
         // TODO: navigate to dashboard or homepage
       } else {
         setError(result.error || 'Innlogging feilet');
@@ -43,7 +43,7 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
+      <form onSubmit={handleSubmit} className="bg-[#f5f2ef] dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
         <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-50">
           Logg inn
         </h2>
@@ -55,16 +55,16 @@ export default function LoginForm() {
         )}
 
         <div className="mb-4">
-          <label htmlFor="username" className="block text-zinc-700 dark:text-zinc-300 text-sm font-bold mb-2">
-            Brukernavn
+          <label htmlFor="email" className="block text-zinc-700 dark:text-zinc-300 text-sm font-bold mb-2">
+            Email
           </label>
           <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="brukernavn"
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-[#f5f2ef] dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
+            placeholder="email@mail.com"
             required
           />
         </div>
@@ -78,7 +78,7 @@ export default function LoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-[#f5f2ef] dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
             placeholder="••••••••"
             required
           />
@@ -88,7 +88,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed w-full"
+            className="bg-[#7EACB5] hover:bg-[#6898A5] text-[#f5f2ef] font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed w-full"
           >
             {loading ? 'Logger inn...' : 'Logg inn'}
           </button>
@@ -96,9 +96,10 @@ export default function LoginForm() {
 
         <div className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
           Har du ikke konto?{' '}
-          <a href="/register" className="text-blue-500 hover:text-blue-700 font-bold">
+          <a href="/register" className="font-bold text-[#7EACB5] hover:text-[#6898A5]">
             Registrer deg
           </a>
+
         </div>
       </form>
     </div>

@@ -1,12 +1,9 @@
-import LoginForm from '@/components/LogInPage/LogInForm';
+import RegisterForm from '@/components/LogInPage/RegisterUser';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4">
-      <LoginForm />
+      <RegisterForm />
     </div>
   );
 }
-
-
-
