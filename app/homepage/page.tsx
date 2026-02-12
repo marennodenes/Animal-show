@@ -1,6 +1,6 @@
 import Sidebar from '@/components/shared/Sidebar';
 import NewPost from '@/components/HomePage/NewPost';
-import CopyWright from '@/components/shared/CopyWright';
+import CopyWright from '@/components/shared/CopyRight';
 
 export default function Home() {
   return (

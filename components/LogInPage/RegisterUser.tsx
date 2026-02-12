@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { register } from '@/lib/auth';
 
 /**
@@ -9,6 +11,7 @@ import { register } from '@/lib/auth';
  * @author haakovha
  */
 export default function RegisterForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -40,8 +43,8 @@ export default function RegisterForm() {
       const result = await register({ email, password });
 
       if (result.success) {
-        alert(`Konto opprettet! Velkommen, ${result.user?.email}!`);
-        // TODO: redirect to login or dashboard
+        // Navigate to homepage after successful registration
+        router.push('/homepage');
       } else {
         setError(result.error || 'Registrering feilet');
       }
@@ -136,9 +139,9 @@ export default function RegisterForm() {
 
           <p className="text-center text-zinc-600 dark:text-zinc-400 text-sm">
             Har du allerede konto?{' '}
-            <a href="/login" className="text-[#7EACB5] hover:text-[#6898A5] font-bold">
+            <Link href="/login" className="text-[#7EACB5] hover:text-[#6898A5] font-bold">
               Logg inn
-            </a>
+            </Link>
           </p>
         </div>
       </form>

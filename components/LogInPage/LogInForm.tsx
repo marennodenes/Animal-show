@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { login } from '@/lib/auth';
 
 /**
@@ -9,6 +11,7 @@ import { login } from '@/lib/auth';
  * @author marennod
  */
 export default function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -29,8 +32,8 @@ export default function LoginForm() {
       if (result.success) {
         // successful login
         console.log('Innlogget som:', result.user);
-        alert(`Velkommen, ${result.user?.email}!`);
-        // TODO: navigate to dashboard or homepage
+        // Navigate to homepage after successful login
+        router.push('/homepage');
       } else {
         setError(result.error || 'Innlogging feilet');
       }
@@ -96,9 +99,9 @@ export default function LoginForm() {
 
         <div className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
           Har du ikke konto?{' '}
-          <a href="/register" className="font-bold text-[#7EACB5] hover:text-[#6898A5]">
+          <Link href="/register" className="font-bold text-[#7EACB5] hover:text-[#6898A5]">
             Registrer deg
-          </a>
+          </Link>
 
         </div>
       </form>
