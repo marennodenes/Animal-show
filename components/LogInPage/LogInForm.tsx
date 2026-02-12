@@ -32,6 +32,9 @@ export default function LoginForm() {
       if (result.success) {
         // successful login
         console.log('Innlogget som:', result.user);
+        alert(`Velkommen, ${result.user?.authUser.email}!`);
+        // TODO: navigate to dashboard or homepage
+
         // Navigate to homepage after successful login
         router.push('/homepage');
       } else {
