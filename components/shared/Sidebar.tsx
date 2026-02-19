@@ -16,7 +16,7 @@ export default function Sidebar() {
 
   return (
   
-    <aside className="group w-50 hover:w-78 h-screen bg-[#7EACB5] flex flex-col items-center py-6 gap-6 transition-all duration-500">
+    <aside className="group fixed left-0 top-0 w-50 hover:w-78 h-screen bg-[#7EACB5] flex flex-col items-center py-6 gap-6 transition-all duration-500 z-40">
       {/* Logo */}
       <div className="mb-4 ">
         <Image 

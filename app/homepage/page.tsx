@@ -4,9 +4,11 @@ import CopyWright from '@/components/shared/CopyRight';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen bg-[#f5f2ef]">
+    <div className="fixed inset-0 flex bg-[#f5f2ef]">
       <Sidebar />
-      <NewPost />
+      <main className="flex-1 ml-50 overflow-y-auto">
+        <NewPost />
+      </main>
       <CopyWright />
     </div>
     

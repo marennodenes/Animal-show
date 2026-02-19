@@ -1,15 +1,15 @@
-/**
- * @author mahberg 
- **/
+    /**
+     * @author mahberg
+     **/
 
 import { createClient } from "@/utils/supabase/client";
 import { UUID } from "crypto";
 
 // getAllCompetitions - get all competitions from the database ordered by end date
 export async function getAllCompetitions() {
-  const supabase = createClient();
+const supabase = createClient();
 
-    const { data, error } = await supabase.from("competitions").select("*")
+    const { data, error } = await supabase.schema("public").from("Competition").select("*")
     .order("end_date", { ascending: true });
     if (error) {
         return {success: false, error: error.message};
@@ -20,7 +20,7 @@ export async function getAllCompetitions() {
 // getCompetitionById - get a competition by id from the database
 export async function getCompetitionById(id: UUID) {
     const supabase = createClient();
-    const { data, error } = await supabase.from("competitions").select("*").eq("id", id).single();
+    const { data, error } = await supabase.schema("public").from("Competition").select("*").eq("id", id).single();
     if (error) {
         return {success: false, error: error.message};
 
@@ -29,17 +29,16 @@ export async function getCompetitionById(id: UUID) {
 }
 
 // createCompetition - insert a newly created competition in the database
-export async function createCompetition({id, name, start_date, end_date}: 
-    {id: UUID; name: string; start_date: string; end_date: string;}) {
+export async function createCompetition({name, start_date, end_date}: 
+    { name: string; start_date: string; end_date: string;}) {
 
     const supabase = createClient();
 
-    const { data, error } = await supabase.from("competitions").insert([{ id, name, start_date, end_date, created_at: new Date() }])
-    .select("*").single();
+    const { data, error } = await supabase.schema("public").from("Competition").insert([{name, start_date, end_date}]);
 
     if (error) {
         return {success: false, error: error.message};
     }
-
+    console.log('Competition created:', data);
     return {success: true, data};
 }

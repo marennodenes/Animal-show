@@ -4,6 +4,9 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { register } from '@/lib/auth';
+import EmailInput from '@/components/shared/EmailInput';
+import PasswordInput from '@/components/shared/PasswordInput';
+import ErrorMessage from '@/components/shared/ErrorMessage';
 
 /**
  * Register form component
@@ -68,64 +71,35 @@ export default function RegisterForm() {
           Registrer deg
         </h2>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
-          </div>
-        )}
+        <ErrorMessage message={error} />
 
         <div className="mb-4">
-          <label
-            htmlFor="email"
-            className="block text-zinc-700 dark:text-zinc-300 text-sm font-bold mb-2"
-          >
-            Email
-          </label>
-          <input
+          <EmailInput
             id="email"
-            type="email"
+            label="Email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-[#f5f2ef] dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
-            placeholder="email@mail.com"
+            onChange={setEmail}
             required
-            minLength={3}
           />
         </div>
 
         <div className="mb-4">
-          <label
-            htmlFor="password"
-            className="block text-zinc-700 dark:text-zinc-300 text-sm font-bold mb-2"
-          >
-            Passord
-          </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
+            label="Passord"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-[#f5f2ef] dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
-            placeholder="••••••••"
+            onChange={setPassword}
             required
             minLength={6}
           />
         </div>
 
         <div className="mb-6">
-          <label
-            htmlFor="passwordConfirm"
-            className="block text-zinc-700 dark:text-zinc-300 text-sm font-bold mb-2"
-          >
-            Bekreft passord
-          </label>
-          <input
+          <PasswordInput
             id="passwordConfirm"
-            type="password"
+            label="Bekreft passord"
             value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-zinc-900 dark:text-zinc-100 bg-[#f5f2ef] dark:bg-zinc-800 leading-tight focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
-            placeholder="••••••••"
+            onChange={setPasswordConfirm}
             required
             minLength={6}
           />
