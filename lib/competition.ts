@@ -42,3 +42,13 @@ export async function createCompetition({name, start_date, end_date}:
     console.log('Competition created:', data);
     return {success: true, data};
 }
+
+export async function participateCompetition({userID, competitionID}: {userID: string, competitionID: string}) {
+    const supabase = createClient();
+    const { data, error } = await supabase.schema("public").from("CompetitionUsers").insert([{UserID: userID, CompID: competitionID}]);
+    if (error) {
+        return {success: false, error: error.message};
+    }
+    console.log('User participated in competition:', data);
+    return {success: true, data};
+}
