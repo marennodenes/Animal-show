@@ -7,89 +7,40 @@
 
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState} from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import TextInput from '@/components/shared/TextInput';
-import PasswordInput from '@/components/shared/PasswordInput';
-import DisabledEmailInput from '@/components/Profile/DisabledEmailInput';
 import ErrorMessage from '@/components/shared/ErrorMessage';
-import SuccessMessage from '@/components/shared/SuccessMessage';
 import ProfilePictureUpload from '@/components/Profile/ProfilePictureUpload';
+import SuccessMessage from '@/components/shared/SuccessMessage';
+import DogList from './DogList';
 
+
+
+/**
+ * Profile Form Component 
+ * Displays user profile information 
+ * @author noravsk
+ * @author marennod
+ */
 interface ProfileFormProps {
-  initialUserName: string;
+  userName: string;
   userEmail: string;
+  userBio?: string;
+  userID: string;
 }
 
-export default function ProfileForm({ initialUserName, userEmail }: ProfileFormProps) {
+export default function ProfileForm({ userName, userEmail, userBio, userID }: ProfileFormProps) {
   const router = useRouter();
-  const [userName, setUserName] = useState(initialUserName);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  
 
-  const handleSaveChanges = async () => {
-    setError('');
-    setSuccess('');
+  const handleSaveProfile = async () => {
     setSaving(true);
-
-    try {
-      const supabase = createClient();
-
-      // Update password if provided
-      if (newPassword || confirmPassword) {
-        if (newPassword !== confirmPassword) {
-          setError('Passordene er ikke like');
-          setSaving(false);
-          return;
-        }
-
-        if (newPassword.length < 6) {
-          setError('Passordet må være minst 6 tegn');
-          setSaving(false);
-          return;
-        }
-
-        const { error: passwordError } = await supabase.auth.updateUser({
-          password: newPassword
-        });
-
-        if (passwordError) {
-          setError(passwordError.message);
-          setSaving(false);
-          return;
-        }
-      }
-
-      // Update user metadata (name)
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: { name: userName }
-      });
-
-      if (metadataError) {
-        setError(metadataError.message);
-        setSaving(false);
-        return;
-      }
-
-      setSuccess('Endringer lagret!');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (err) {
-      setError('Noe gikk galt. Prøv igjen.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
+    setSaving(false);
   };
 
   return (
@@ -105,52 +56,32 @@ export default function ProfileForm({ initialUserName, userEmail }: ProfileFormP
           onImageChange={setProfileImage}
         />
 
-        <TextInput
-          label="Navn"
-          value={userName}
-          onChange={setUserName}
-        />
-        
-        <DisabledEmailInput
-          label="Epost"
-          value={userEmail}
-        />
-
-        <PasswordInput
-          label="Endre passord"
-          value={newPassword}
-          onChange={setNewPassword}
-          placeholder="Skriv inn nytt passord"
-          minLength={6}
-        />
-
-        <PasswordInput
-          label="Bekreft passord"
-          value={confirmPassword}
-          onChange={setConfirmPassword}
-          placeholder="Bekreft nytt passord"
-          minLength={6}
-        />
-
-        <div className="pt-4">
-          <button
-            type="button"
-            onClick={handleSaveChanges}
-            disabled={saving}
-            className="w-full bg-[#7EACB5] text-white py-2 px-4 rounded-md hover:bg-[#6a9aa3] transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Lagrer...' : 'Lagre endringer'}
-          </button>
+        {/* Name and bio */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {userName}
+          </h2>
+          {userBio && (
+            <p className="text-gray-600 mt-2 whitespace-pre-wrap">
+              {userBio}
+            </p>
+          )}
         </div>
 
-        <div className="pt-2">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="w-full bg-white text-[#BF4646] border-2 border-[#BF4646] py-2 px-4 rounded-md hover:bg-[#BF4646] hover:text-white transition font-medium"
-          >
-            Logg ut
-          </button>
+        {/* My Dogs */}
+        <div className="border-t border-gray-300 pt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-medium text-gray-700">Mine hunder</h3>
+            <button
+              type="button"
+              onClick={() => router.push('/addDog')}
+              className="text-[#7EACB5] hover:text-[#6a9aa3] font-medium text-sm flex items-center gap-1"
+            >
+              + Legg til
+            </button>
+          </div>
+          {/* DogList*/}
+          <DogList userId={userID} />
         </div>
       </div>
     </div>

@@ -17,7 +17,9 @@ export default function ProfilePage() {
   const router = useRouter();
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [userBio, setUserBio] = useState('');
   const [loading, setLoading] = useState(true);
+  const [userID, setUserID] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -26,8 +28,21 @@ export default function ProfilePage() {
       
       if (user) {
         setUserEmail(user.email || '');
+        setUserID(user.id);
         setUserName(user.user_metadata?.name || user.email?.split('@')[0] || '');
         setLoading(false);
+
+        const { data: userData } = await supabase
+          .from('User')
+          .select('name, bio')
+          .eq('id', user.id)
+          .single();
+        
+        // Use name from database, else first part of email as fallback
+        setUserName(userData?.name || user.email?.split('@')[0] || '');
+        setUserBio(userData?.bio || '');
+        setLoading(false);
+
       } else {
         // Not logged in, redirect to login
         router.push('/login');
@@ -56,8 +71,10 @@ export default function ProfilePage() {
       <Sidebar />
       <main className="flex-1 p-8 ml-50 overflow-y-auto">
         <ProfileForm 
-          initialUserName={userName}
+          userName={userName}
           userEmail={userEmail}
+          userBio={userBio}
+          userID={userID}
         />
       </main>
       <CopyWright />
