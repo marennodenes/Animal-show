@@ -46,7 +46,7 @@ export default function RegisterForm() {
       const result = await register({ email, password });
 
       if (result.success) {
-        alert(`Konto opprettet! Velkommen, ${result.user?.authUser.email}!`);
+        alert(`Konto opprettet! Velkommen, ${result.user?.email}!`);
         // TODO: redirect to login or dashboard
         
         // Navigate to homepage after successful registration

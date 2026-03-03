@@ -3,6 +3,7 @@
  **/
 
 import { createClient } from "@/utils/supabase/client";
+import User from "@/lib/models/User";
 
 /**
  * Authenticates a user using email and password.
@@ -18,14 +19,11 @@ import { createClient } from "@/utils/supabase/client";
  * @param {string} params.email - The user's email address.
  * @param {string} params.password - The user's password.
  *
- * @returns {Promise<
- *   | { success: true; user: { authUser: any; publicUser: any } }
- *   | { success: false; error: string }
- * >}
+ * 
  **/
 export async function login({ email, password }: { email: string; password: string }) {
   const supabase = createClient();
-  
+
   const {data: data,error: error} = await supabase.auth.signInWithPassword({email,password});
 
   if (error) {
@@ -39,8 +37,8 @@ export async function login({ email, password }: { email: string; password: stri
     return {success: false, error: "Fetching the user from the database wen't wrong"}
   }
 
-  //We should think about creating a userModel and returning that instead
-  return {success: true, user: {authUser,publicUser}}
+  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin,authUser.email ?? '', publicUser.bio);
+  return {success: true, user: user}
 }
 
 /**
@@ -59,10 +57,6 @@ export async function login({ email, password }: { email: string; password: stri
  * @param {string} params.email - The user's email address.
  * @param {string} params.password - The user's password.
  *
- * @returns {Promise<
- *   | { success: true; user: { authUser: any; publicUser: any } }
- *   | { success: false; error: string }
- * >}
  **/
 export async function register({ email, password}: { email: string; password: string}) {
   //Create Client
@@ -86,7 +80,16 @@ export async function register({ email, password}: { email: string; password: st
   //Fetch new User-wrapper-data
   const {data: publicUser, error: userError} = await supabase.schema('public').from('User').select('*').eq('id',authUser.id).single();
 
+  if (userError) {return {success: false, error: "Fetching the user from the database wen't wrong"}} //If this fails there may exist an object in supabase.auth but not the User-wrapper
+
   //Return sucess with User-wrapper-data
-  //We should think about creating a userModel and returning that instead
-  return {success: true, user: {authUser,publicUser}}
+  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin,authUser.email ?? '', publicUser.bio);
+  return {success: true, user: user}
+}
+
+export async function isLoggedIn() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  return user !== null;
 }

@@ -6,6 +6,8 @@ import Sidebar from '@/components/shared/Sidebar';
 import CopyWright from '@/components/shared/CopyRight';
 import ProfileForm from '@/components/Profile/ProfileForm';
 import { createClient } from '@/utils/supabase/client';
+import { isLoggedIn } from '@/lib/auth';
+import User from '@/lib/models/User';
 
 /**
  * Profile page component
@@ -23,27 +25,26 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        setUserEmail(user.email || '');
-        setUserID(user.id);
-        setUserName(user.user_metadata?.name || user.email?.split('@')[0] || '');
-        setLoading(false);
+    const user: User = JSON.parse(sessionStorage.getItem("user") || '{}');
+    const supabase = createClient();
 
-        const { data: userData } = await supabase
-          .from('User')
-          .select('name, bio')
-          .eq('id', user.id)
-          .single();
-        
-        // Use name from database, else first part of email as fallback
-        setUserName(userData?.name || user.email?.split('@')[0] || '');
-        setUserBio(userData?.bio || '');
-        setLoading(false);
+    if (user && await isLoggedIn() === true) {
+      setUserEmail(user.email || '');
+      setUserName(user.name || user.email?.split('@')[0] || '');
+      setUserID(user.id);
+      setLoading(false);
 
-      } else {
+      //Could be better to move this to lib, but for now it's fine to fetch it here since we need it for the profile page
+      const { data: bioData } = await supabase
+        .from('User')
+        .select('bio')
+        .eq('id', user.id)
+        .single();
+
+      // Use name from database, else first part of email as fallback
+      setUserBio(bioData?.bio || '');
+      }
+      else {
         // Not logged in, redirect to login
         router.push('/login');
       }
