@@ -1,31 +1,40 @@
 import { createClient } from '@/utils/supabase/client';
-
+import Animal from '@/lib/models/Animals';
 /**
  * Dog-related database functions
  * @author marennod
  */
 
-// Interface for Dog data structure
-export interface Dog {
-  id: string;
-  name: string;
-  breed: string;
-  birth_date: string;
-  image_url: string | null;
-  user_id: string;
-}
-
 /**
  * Fetch all dogs for a specific user
  */
-export async function getUserDogs(userId: string): Promise<Dog[]> {
+export async function getUserAnimals(userId: string): Promise<Animal[]> {
+  const supabase = createClient();
+  
+  // Get all animals where user_id matches, ordered by newest first
+  const { data, error } = await supabase
+    .from('Animal')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching animals:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function getUserDogs(userId: string): Promise<Animal[]> {
   const supabase = createClient();
   
   // Get all dogs where user_id matches, ordered by newest first
   const { data, error } = await supabase
-    .from('Dog')
+    .from('Animal')
     .select('*')
     .eq('user_id', userId)
+    .eq('species', 'dog')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -36,21 +45,40 @@ export async function getUserDogs(userId: string): Promise<Dog[]> {
   return data || [];
 }
 
-/**
- * Add a new dog to the database
- */
-export async function addDog(dog: Omit<Dog, 'id'>) {
+export async function getUserCats(userId: string): Promise<Animal[]> {
   const supabase = createClient();
   
-  // Insert new dog and return the created record
+  // Get all cats where user_id matches, ordered by newest first
   const { data, error } = await supabase
-    .from('Dog')
-    .insert([dog])
+    .from('Animal')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('species', 'cat')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching cats:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/**
+ * Add a new animal to the database
+ */
+export async function addAnimal(animal: Omit<Animal, 'id'>) {
+  const supabase = createClient();
+  
+  // Insert new animal and return the created record
+  const { data, error } = await supabase
+    .from('Animal')
+    .insert([animal])
     .select()
     .single();
 
   if (error) {
-    console.error('Error adding dog:', error);
+    console.error('Error adding animal:', error);
     return { success: false, error: error.message };
   }
 
@@ -58,19 +86,19 @@ export async function addDog(dog: Omit<Dog, 'id'>) {
 }
 
 /**
- * Delete a dog from the database
+ * Delete an animal from the database
  */
-export async function deleteDog(dogId: string) {
+export async function deleteAnimal(animalId: string) {
   const supabase = createClient();
   
-  // Delete dog by id
+  // Delete animal by id
   const { error } = await supabase
-    .from('Dog')
+    .from('Animal')
     .delete()
-    .eq('id', dogId);
+    .eq('id', animalId);
 
   if (error) {
-    console.error('Error deleting dog:', error);
+    console.error('Error deleting animal:', error);
     return { success: false, error: error.message };
   }
 
@@ -78,9 +106,9 @@ export async function deleteDog(dogId: string) {
 }
 
 /**
- * Upload dog image to Supabase Storage (bucket: 'dog_images') and return the public URL
+ * Upload animal image to Supabase Storage (bucket: 'dog_images') and return the public URL
  */
-export async function uploadDogImage(userId: string, image: File): Promise<string | null> {
+export async function uploadAnimalImage(userId: string, image: File): Promise<string | null> {
   const supabase = createClient();
   const fileExt = image.name.split('.').pop();
   const fileName = `${userId}/${Date.now()}.${fileExt}`;

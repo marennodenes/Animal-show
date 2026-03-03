@@ -1,6 +1,6 @@
 /**
- * Add Dog Form Component
- * Form for adding a new dog to the user's profile
+ * Add Animal Form Component
+ * Form for adding a new animal to the user's profile
  * @author mahberg
  * @author marennod
  */
@@ -9,22 +9,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { addDog, uploadDogImage } from '@/lib/dog';
+import { addAnimal, uploadAnimalImage } from '@/lib/dog';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import SuccessMessage from '@/components/shared/SuccessMessage';
 import { Dog as DogIcon} from 'lucide-react'
 
 /**
- * Props for AddDogForm component
+ * Props for AddAnimalForm component
  */
-interface AddDogFormProps {
+interface AddAnimalFormProps {
   userId: string;
 }
 
 /**
- * Form component for adding a new dog to the user's profile
+ * Form component for adding a new animal to the user's profile
  */
-export default function AddDogForm({ userId }: AddDogFormProps) {
+export default function addAnimalForm({ userId }: AddAnimalFormProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
@@ -51,16 +51,24 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
     }
   };
 
+  type AnimalType = 'dog' | 'cat' | '---';
+  const [selectedPet, setSelectedPet] = useState<AnimalType | ''>('');
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPet(event.target.value as AnimalType);
+  };
+
+
   /**
    * Handles form submission
-   * Uploads image if selected, then adds dog to database
+   * Uploads image if selected, then adds animal to database
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
 
     if (!name.trim()) {
-      setError('Hundens navn er påkrevd');
+      setError('Dyrets navn er påkrevd');
       return;
     }
 
@@ -69,13 +77,18 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
       return;
     }
 
+    if(!selectedPet || selectedPet === '---'){
+      setError('Type kan ikke være ---');
+      return
+    }
+
     setSaving(true);
 
     try{
         let imageUrl = null;
 
         if(image){
-            imageUrl = await uploadDogImage(userId, image);
+            imageUrl = await uploadAnimalImage(userId, image);
             if (!imageUrl) {
                 setError('Kunne ikke laste opp bilde');
                 setSaving(false);
@@ -83,19 +96,20 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
             }
         }
 
-    const result = await addDog({
+    const result = await addAnimal({
       user_id: userId,
       name: name.trim(),
       breed: breed.trim() || '',
       birth_date: birthDate,
-      image_url: imageUrl
+      image_url: imageUrl,
+      species: selectedPet,
     });
 
     if (result.success) {
-      setSuccess('Hunden ble lagt til!');
+      setSuccess('Dyret ble lagt til!');
       setTimeout(() => router.push('/profile'), 1000);
     } else {
-      setError(result.error || 'Kunne ikke legge til hund');
+      setError(result.error || 'Kunne ikke legge til dyret');
       setSaving(false);
     }
   } catch (err) {
@@ -106,7 +120,7 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Legg til hund</h1>
+      <h1 className="text-3xl font-bold mb-6">Legg til kjeledyr</h1>
 
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
@@ -135,6 +149,23 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
           </label>
           <p className="text-sm text-gray-500 mt-2">Klikk for å laste opp bilde</p>
         </div>
+
+
+        <div>
+          <label htmlFor="pet-select" className="block text-sm font-medium text-gray-700">
+          Velg type
+          </label>
+          <select
+            id="pet-select"
+            value={selectedPet}
+            onChange={handleChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option value="">----</option>
+            <option value="dog">Hund</option>
+            <option value="cat">Katt</option>
+          </select>
+        </div>
         
         {/* Name field */}
         <div>
@@ -145,7 +176,7 @@ export default function AddDogForm({ userId }: AddDogFormProps) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Hundens navn"
+            placeholder="Kjeledyrets navn"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
           />
         </div>

@@ -3,11 +3,11 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import DropdownInput from "@/components/shared/DropdownInput";
-import { getUserDogs } from "@/lib/dog";
+import { getUserAnimals } from "@/lib/dog";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect } from "react";
 import { getAllCompetitions } from "@/lib/competition";
-import { addDogToCompetition } from "@/lib/competition";
+import { addAnimalToCompetition } from "@/lib/competition";
 import { waitForDebugger } from "inspector";
 
 /**
@@ -17,32 +17,32 @@ import { waitForDebugger } from "inspector";
  */
 export default function NewPost() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedDog, setSelectedDog] = useState("");
+  const [selectedAnimal, setSelectedAnimal] = useState("");
   const [selectedCompetition, setSelectedCompetition] = useState("");
   const [postContent, setPostContent] = useState("");
-  const [userDogs, setUserDogs] = useState<any[]>([]);
+  const [userAnimals, setUserAnimals] = useState<any[]>([]);
   const [competitions, setCompetitions] = useState<any[]>([]);
   const MAX_CHARS = 500;
 
   useEffect(() => {
-    const fetchDogs = async () => {
+    const fetchAnimals = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const dogs = await getUserDogs(user.id);
-      setUserDogs(dogs);
+      const animals = await getUserAnimals(user.id);
+      setUserAnimals(animals);
     };
 
-    fetchDogs();
+    fetchAnimals();
   }, []);
 
   useEffect(() => {
-    const fetchDogs = async () => {
+    const fetchAnimals = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const dogs = await getUserDogs(user.id);
-    setUserDogs(dogs);
+    const animals = await getUserAnimals(user.id);
+    setUserAnimals(animals);
   };
 
   const fetchCompetitions = async () => {
@@ -52,13 +52,13 @@ export default function NewPost() {
     }
   };
 
-  fetchDogs();
+  fetchAnimals();
   fetchCompetitions();
 }, []);
   
-  const dogOptions = userDogs.map(dog => ({
-  value: dog.id,   
-  label: dog.name,
+  const animalOptions = userAnimals.map(animal => ({
+  value: animal.id,   
+  label: animal.name,
 }));
 
 const competitionOptions = competitions.map(comp => ({
@@ -66,7 +66,7 @@ const competitionOptions = competitions.map(comp => ({
   label: comp.name,
 }));
 
-  const canPublish = selectedDog !== "" && selectedCompetition !== "";
+  const canPublish = selectedAnimal !== "" && selectedCompetition !== "";
 
   return (
     <>
@@ -102,11 +102,11 @@ const competitionOptions = competitions.map(comp => ({
               />
               
               <DropdownInput
-                label="Legg til hund"
-                value={selectedDog}
-                onChange={setSelectedDog}
-                options={dogOptions}
-                placeholder="Velg hund"
+                label="Legg til kjeledyr"
+                value={selectedAnimal}
+                onChange={setSelectedAnimal}
+                options={animalOptions}
+                placeholder="Velg kjeledyr"
               />
               
               <div>
@@ -124,8 +124,8 @@ const competitionOptions = competitions.map(comp => ({
               
               <button
                 onClick={async () => {
-                  // Log dog in competition 
-                  await addDogToCompetition(selectedDog, selectedCompetition, postContent);
+                  // Log animal in competition 
+                  await addAnimalToCompetition(selectedAnimal, selectedCompetition, postContent);
                   setIsOpen(false);
                 }}
                 disabled={!canPublish}

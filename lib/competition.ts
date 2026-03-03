@@ -5,6 +5,16 @@
 import { createClient } from "@/utils/supabase/client";
 import { UUID } from "crypto";
 
+export interface competition {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  image_url: string | null;
+  description: string;
+  species: string;
+}
+
 // getAllCompetitions - get all competitions from the database ordered by end date
 export async function getAllCompetitions() {
 const supabase = createClient();
@@ -29,12 +39,13 @@ export async function getCompetitionById(id: UUID) {
 }
 
 // createCompetition - insert a newly created competition in the database
-export async function createCompetition({name, start_date, end_date}: 
-    { name: string; start_date: string; end_date: string;}) {
+export async function createCompetition({name, start_date, end_date, description, species, image_url}: 
+    { name: string; start_date: string; end_date: string; description: string; species?: string; image_url: string | null }) {
 
     const supabase = createClient();
 
-    const { data, error } = await supabase.schema("public").from("Competition").insert([{name, start_date, end_date}]);
+    const { data, error } = await supabase.schema("public").from("Competition")
+    .insert([{name, start_date, end_date, description, species, image_url}]);
 
     if (error) {
         return {success: false, error: error.message};
@@ -53,16 +64,40 @@ export async function participateCompetition({userID, competitionID}: {userID: s
     return {success: true, data};
 }
 
-export async function addDogToCompetition(dogID: string, competitionID: string, text?: string) {
+export async function addAnimalToCompetition(animalID: string, competitionID: string, text?: string, species?: string) {
   const supabase = createClient();
-  const insertObj: any = { dog_id: dogID, competition_id: competitionID };
+  const insertObj: any = { animal_id: animalID, competition_id: competitionID, species: species };
   if (text) insertObj.text = text;
   const { data, error } = await supabase
-    .from("DogsInCompetition")
+    .from("animal_in_competition")
     .insert([insertObj]);
   if (error) {
-    console.error("Error adding dog to competition:", error);
+    console.error("Error adding animal to competition:", error);
     return { success: false, error: error.message };
   }
   return { success: true, data };
+}
+
+/**
+ * Upload animal image to Supabase Storage (bucket: 'competition_images') and return the public URL
+ */
+export async function uploadCompetitionImage(userId: string, image: File): Promise<string | null> {
+  const supabase = createClient();
+  const fileExt = image.name.split('.').pop();
+  const fileName = `${userId}/${Date.now()}.${fileExt}`;
+  
+  const { error: uploadError } = await supabase.storage
+    .from('competition_images')
+    .upload(fileName, image);
+
+  if (uploadError) {
+    console.error('Error uploading image:', uploadError);
+    return null;
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('competition_images')
+    .getPublicUrl(fileName);
+  
+  return publicUrl;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCompetition } from '@/lib/competition';
 import TextInput from '@/components/shared/TextInput';
@@ -9,14 +9,21 @@ import DateInput from '@/components/shared/DateInput';
 import FormButtons from '@/components/shared/FormButtons';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import ImageUpload from '@/components/shared/ImageUpload';
+import { uploadCompetitionImage } from '@/lib/competition';
 
 /**
  * Create Competition Form Component
  * Form to create a new competition
  * @author marennod
  * @author mahberg
+ * @author haakovha
  */
-export default function CreateCompetitionForm() {
+
+interface CreateCompetitionFormProps {
+  userID: string;
+}
+
+export default function CreateCompetitionForm({ userID }: CreateCompetitionFormProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -26,12 +33,17 @@ export default function CreateCompetitionForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const today = new Date();
-  //sett tid til 00:00
   today.setHours(0, 0, 0, 0);
 
+  type AnimalType = 'dog' | 'cat' | 'mixed';
+  const [selectedPet, setSelectedPet] = useState<AnimalType | ''>('');
+
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPet(event.target.value as AnimalType);
+  };
 
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -42,19 +54,29 @@ export default function CreateCompetitionForm() {
       setLoading(false);
       return;
     }
-    //add check so you can't select a startDate in the past.
-    if (new Date(startDate)<today){
-      setError("Startdato kan ikke være fortid");
+    if (new Date(startDate) < today) {
+      setError('Startdato kan ikke være fortid');
       setLoading(false);
-      return
+      return;
     }
 
+    let imageUrl: string | null = null;
+
+        if(image){
+            imageUrl = await uploadCompetitionImage(userID, image);
+            if (!imageUrl) {
+                setError('Kunne ikke laste opp bilde');
+                setLoading(false);
+                return;
+            }
+        }
+
     try {
-      
-      console.log('Opprett konkurranse:', { name, description, startDate, endDate, image });
+
+      console.log('Opprett konkurranse:', { name, description, startDate, endDate, imageUrl });
       //call to database
-      createCompetition({ name, start_date: startDate, end_date: endDate });
-      console.log('Konkurranse opprettet:', { name, description, startDate, endDate, image });
+      await createCompetition({ name, start_date: startDate, end_date: endDate, description, species: selectedPet, image_url: imageUrl });
+      console.log('Konkurranse opprettet:', { name, description, startDate, endDate, imageUrl });
       // Navigate back to competitions page
       router.push('/competitions');
     } catch (err) {
@@ -70,7 +92,6 @@ export default function CreateCompetitionForm() {
       <ErrorMessage message={error} />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
-        
         <TextInput
           label="Navn på konkurranse"
           value={name}
@@ -87,6 +108,21 @@ export default function CreateCompetitionForm() {
           rows={4}
           required
         />
+        <div>
+          <label htmlFor="pet-select" className="block text-sm font-medium text-gray-700">
+          Velg konkurranse type
+          </label>
+          <select
+            id="pet-select"
+            value={selectedPet}
+            onChange={handleChange}
+            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+          >
+            <option value="dog">Hund</option>
+            <option value="cat">Katt</option>
+            <option value="mixed">Blandet</option>
+          </select>
+        </div>
 
         <DateInput
           label="Startdato"
@@ -109,10 +145,7 @@ export default function CreateCompetitionForm() {
           onImageChange={setImage}
         />
 
-        <FormButtons
-          loading={loading}
-          cancelRoute="/competitions"
-        />
+        <FormButtons loading={loading} cancelRoute="/competitions" />
       </form>
     </div>
   );

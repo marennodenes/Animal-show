@@ -13,7 +13,7 @@ import { createClient } from '@/utils/supabase/client';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import ProfilePictureUpload from '@/components/Profile/ProfilePictureUpload';
 import SuccessMessage from '@/components/shared/SuccessMessage';
-import DogList from './DogList';
+import AnimalList from './AnimalList';
 
 
 
@@ -68,20 +68,20 @@ export default function ProfileForm({ userName, userEmail, userBio, userID }: Pr
           )}
         </div>
 
-        {/* My Dogs */}
+        {/* My Animals */}
         <div className="border-t border-gray-300 pt-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-medium text-gray-700">Mine hunder</h3>
+            <h3 className="text-xl font-medium text-gray-700">Mine kjeledyr</h3>
             <button
               type="button"
-              onClick={() => router.push('/addDog')}
+              onClick={() => router.push('/addAnimal')}
               className="text-[#7EACB5] hover:text-[#6a9aa3] font-medium text-sm flex items-center gap-1"
             >
               + Legg til
             </button>
           </div>
-          {/* DogList*/}
-          <DogList userId={userID} />
+          {/* AnimalList*/}
+          <AnimalList userId={userID} />
         </div>
       </div>
     </div>
