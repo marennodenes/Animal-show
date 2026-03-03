@@ -58,7 +58,6 @@ export default function ProfilePage() {
         <Sidebar />
         <main className="flex-1 p-8 ml-50 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            <p>Laster...</p>
           </div>
         </main>
         <CopyWright />

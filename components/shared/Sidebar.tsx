@@ -20,7 +20,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="mb-4 ">
         <Image 
-          src="/poteshow.png" 
+          src="/Logo.png" 
           alt="Poteshow logo" 
           width={150} 
           height={150}

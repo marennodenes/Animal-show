@@ -3,6 +3,12 @@
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import DropdownInput from "@/components/shared/DropdownInput";
+import { getUserDogs } from "@/lib/dog";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect } from "react";
+import { getAllCompetitions } from "@/lib/competition";
+import { addDogToCompetition } from "@/lib/competition";
+import { waitForDebugger } from "inspector";
 
 /**
  * NewPost component for creating a new post
@@ -14,15 +20,51 @@ export default function NewPost() {
   const [selectedDog, setSelectedDog] = useState("");
   const [selectedCompetition, setSelectedCompetition] = useState("");
   const [postContent, setPostContent] = useState("");
+  const [userDogs, setUserDogs] = useState<any[]>([]);
+  const [competitions, setCompetitions] = useState<any[]>([]);
   const MAX_CHARS = 500;
+
+  useEffect(() => {
+    const fetchDogs = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const dogs = await getUserDogs(user.id);
+      setUserDogs(dogs);
+    };
+
+    fetchDogs();
+  }, []);
+
+  useEffect(() => {
+    const fetchDogs = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const dogs = await getUserDogs(user.id);
+    setUserDogs(dogs);
+  };
+
+  const fetchCompetitions = async () => {
+    const result = await getAllCompetitions();
+    if (result.success && result.data) {
+      setCompetitions(result.data); 
+    }
+  };
+
+  fetchDogs();
+  fetchCompetitions();
+}, []);
   
-  // TODO: Fetch the user's dogs from the database
-  const userDogs: string[] = []; 
-  const dogOptions = userDogs.map(dog => ({ value: dog, label: dog }));
-  
-  // TODO: Fetch available competitions from the database
-  const competitions: string[] = []; 
-  const competitionOptions = competitions.map(comp => ({ value: comp, label: comp }));
+  const dogOptions = userDogs.map(dog => ({
+  value: dog.id,   
+  label: dog.name,
+}));
+
+const competitionOptions = competitions.map(comp => ({
+  value: comp.id,
+  label: comp.name,
+}));
 
   const canPublish = selectedDog !== "" && selectedCompetition !== "";
 
@@ -81,7 +123,9 @@ export default function NewPost() {
               </div>
               
               <button
-                onClick={() => {
+                onClick={async () => {
+                  // Log dog in competition 
+                  await addDogToCompetition(selectedDog, selectedCompetition, postContent);
                   setIsOpen(false);
                 }}
                 disabled={!canPublish}

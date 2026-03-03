@@ -7,13 +7,13 @@ import { getAllCompetitions, getCompetitionById, participateCompetition } from '
 import Competition from '@/lib/models/Competition'; 
 
 export default function NewCompetition() {
- // adjust path as needed
 
   const router = useRouter();
   
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
   useEffect(() => {
     async function loadCompetitions() {
       const result = await getAllCompetitions();
@@ -23,12 +23,15 @@ export default function NewCompetition() {
     }
     loadCompetitions();
   }, []);
+
   const handleClick = () => {
     router.push('/create-competition');
   };
-  const handleParticipate = async (competitionID: string) => 
+
+  const handleParticipate = async (competitionID: string) =>
+
   {
-    const result = await participateCompetition({ userID: '00ff5c18-0713-4e03-b7b4-1d9ecb60763e', competitionID});
+  const result = await participateCompetition({ userID: '00ff5c18-0713-4e03-b7b4-1d9ecb60763e', competitionID});
     
     if (result.success) {
         alert('Du er nå påmeldt konkurransen: ');

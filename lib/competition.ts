@@ -52,3 +52,17 @@ export async function participateCompetition({userID, competitionID}: {userID: s
     console.log('User participated in competition:', data);
     return {success: true, data};
 }
+
+export async function addDogToCompetition(dogID: string, competitionID: string, text?: string) {
+  const supabase = createClient();
+  const insertObj: any = { dog_id: dogID, competition_id: competitionID };
+  if (text) insertObj.text = text;
+  const { data, error } = await supabase
+    .from("DogsInCompetition")
+    .insert([insertObj]);
+  if (error) {
+    console.error("Error adding dog to competition:", error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data };
+}
