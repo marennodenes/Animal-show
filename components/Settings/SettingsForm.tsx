@@ -12,18 +12,20 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import SuccessMessage from '@/components/shared/SuccessMessage';
+import ProfilePictureUpload from './ProfilePictureUpload';
 
 interface SettingsFormProps {
   userEmail: string;
   userId: string;
   initialName?: string;
   initialBio?: string;
+  imageUrl?: string
 }
 
-export default function SettingsForm({ userEmail, userId, initialName, initialBio }: SettingsFormProps) {
+export default function SettingsForm({ userEmail, userId, initialName, initialBio, imageUrl }: SettingsFormProps) {
   const router = useRouter();
   const defaultName = userEmail.split('@')[0];
-  
+
   const [name, setName] = useState(initialName || defaultName);
   const [bio, setBio] = useState(initialBio || '');
   const [newPassword, setNewPassword] = useState('');
@@ -31,15 +33,16 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
 
   const handleSaveChanges = async () => {
     setError('');
     setSuccess('');
     setSaving(true);
-    
+
     try {
       const supabase = createClient();
-      
+
       // Oppdater profil (navn og bio)
       const { error: profileError } = await supabase
         .from('User')
@@ -48,13 +51,13 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
           bio: bio
         })
         .eq('id', userId);
-      
+
       if (profileError) {
         setError(profileError.message);
         setSaving(false);
         return;
       }
-      
+
       // Oppdater passord hvis det er fylt ut
       if (newPassword) {
         if (newPassword !== confirmPassword) {
@@ -62,27 +65,27 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
           setSaving(false);
           return;
         }
-        
+
         if (newPassword.length < 6) {
           setError('Passordet må være minst 6 tegn');
           setSaving(false);
           return;
         }
-        
+
         const { error: passwordError } = await supabase.auth.updateUser({
           password: newPassword
         });
-        
+
         if (passwordError) {
           setError(passwordError.message);
           setSaving(false);
           return;
         }
-        
+
         setNewPassword('');
         setConfirmPassword('');
       }
-      
+
       setSuccess('Endringene ble lagret');
       router.refresh();
     } catch (err) {
@@ -102,9 +105,16 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Innstillinger</h1>
-      
+
       <ErrorMessage message={error} />
       <SuccessMessage message={success} />
+
+      <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
+          <ProfilePictureUpload
+            image={profileImage}
+            onImageChange={setProfileImage}
+          />
+        </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
         <div>

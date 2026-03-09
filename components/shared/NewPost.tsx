@@ -135,11 +135,11 @@ return (
 
               {/* Dropdown for selecting dog */}
               <DropdownInput
-                label="Legg til kjeledyr"
+                label="Legg til kjæledyr"
                 value={selectedAnimal}
                 onChange={setSelectedAnimal}
                 options={animalOptions}
-                placeholder="Velg kjeledyr"
+                placeholder="Velg kjæledyr"
               />
 
               {/* Textarea for post content */}
@@ -148,8 +148,8 @@ return (
                   value={postContent}
                   onChange={(e) => setPostContent(e.target.value)}
                   maxLength={MAX_CHARS}
-                  className="w-full border border-gray-300 rounded-lg p-3 min-h-[200px] resize-none focus:ring-2 focus:ring-[#7EACB5] focus:border-transparent"
-                  placeholder="Skriv inn innlegget ditt her..."
+                  className="w-full border border-gray-300 rounded-lg p-3 min-h-200px resize-none focus:ring-2 focus:ring-[#7EACB5] focus:border-transparent"
+                  placeholder="Skriv ditt innlegg her..."
                 />
                 <div className="text-sm text-gray-500 text-right mt-1">
                   {postContent.length}/{MAX_CHARS} tegn

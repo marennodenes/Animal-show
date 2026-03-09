@@ -120,21 +120,20 @@ export default function addAnimalForm({ userId }: AddAnimalFormProps) {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Legg til kjeledyr</h1>
+      <h1 className="text-3xl font-bold mb-6">Legg til kjæledyr</h1>
 
       <ErrorMessage message={error} />
-      <SuccessMessage message={success} />
 
+      <SuccessMessage message={success} />
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-4">        
-        {/* Bildeopplasting */}
         <div className="flex flex-col items-center">
           <label className="cursor-pointer">
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 hover:border-[#7EACB5] transition">
               {imagePreview ? (
                 <img 
-                  src={imagePreview} 
-                  alt="Forhåndsvisning" 
-                  className="w-full h-full object-cover"
+                src={imagePreview} 
+                alt="Forhåndsvisning" 
+                className="w-full h-full object-cover"
                 />
               ) : (
                 <DogIcon className="w-12 h-12 text-gray-400" />
@@ -145,11 +144,12 @@ export default function addAnimalForm({ userId }: AddAnimalFormProps) {
               accept="image/*"
               onChange={handleImageChange}
               className="hidden"
-            />
+              />
           </label>
           <p className="text-sm text-gray-500 mt-2">Klikk for å laste opp bilde</p>
         </div>
 
+              {/* Bildeopplasting */}
 
         <div>
           <label htmlFor="pet-select" className="block text-sm font-medium text-gray-700">
@@ -176,7 +176,7 @@ export default function addAnimalForm({ userId }: AddAnimalFormProps) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Kjeledyrets navn"
+            placeholder="Kjæledyrets navn"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7EACB5]"
           />
         </div>

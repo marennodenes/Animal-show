@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [userBio, setUserBio] = useState('');
   const [loading, setLoading] = useState(true);
   const [userID, setUserID] = useState('');
+  const[imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -33,6 +34,15 @@ export default function ProfilePage() {
       setUserName(user.name || user.email?.split('@')[0] || '');
       setUserID(user.id);
       setLoading(false);
+      setImageUrl(user.image_url || '');
+
+      const { data: imageData } = await supabase
+      .from('User')
+      .select('image_url')
+      .eq('id', user.id)
+      .single();
+    
+    setImageUrl(imageData?.image_url || '');
 
       //Could be better to move this to lib, but for now it's fine to fetch it here since we need it for the profile page
       const { data: bioData } = await supabase
@@ -41,6 +51,7 @@ export default function ProfilePage() {
         .eq('id', user.id)
         .single();
 
+      
       // Use name from database, else first part of email as fallback
       setUserBio(bioData?.bio || '');
       }
@@ -75,6 +86,7 @@ export default function ProfilePage() {
           userEmail={userEmail}
           userBio={userBio}
           userID={userID}
+          imageUrl={imageUrl}
         />
       </main>
       <CopyWright />
