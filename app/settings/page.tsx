@@ -14,7 +14,7 @@ export default async function SettingsPage() {
 
   const { data: userData } = await supabase
     .from('User')
-    .select('name, bio')
+    .select('name, bio,image_url')
     .eq('id', user.id)
     .single();
 
@@ -24,6 +24,7 @@ export default async function SettingsPage() {
        userId={user.id}
        initialName={userData?.name || ''}
        initialBio={userData?.bio || ''}
+       imageUrl={userData?.image_url || ''}
       />
       <Sidebar />
               <main className="flex-1 p-8 ml-50 overflow-y-auto">

@@ -112,6 +112,7 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
       <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
           <ProfilePictureUpload
             image={profileImage}
+            imageUrl={imageUrl}
             onImageChange={setProfileImage}
           />
         </div>
