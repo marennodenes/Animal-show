@@ -67,6 +67,9 @@ export default function addAnimalForm({ userId }: AddAnimalFormProps) {
     e.preventDefault();
     setError('');
 
+    const today = new Date();
+    const birth = new Date(birthDate);
+
     if (!name.trim()) {
       setError('Dyrets navn er påkrevd');
       return;
@@ -76,6 +79,12 @@ export default function addAnimalForm({ userId }: AddAnimalFormProps) {
       setError('Fødselsdato er påkrevd');
       return;
     }
+
+    if(birth > today){
+      setError('Fødselsdato kan ikke være i fremtiden');
+      return;
+    }
+
 
     if(!selectedPet || selectedPet === '---'){
       setError('Type kan ikke være ---');
