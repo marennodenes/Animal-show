@@ -93,3 +93,20 @@ export async function isLoggedIn() {
 
   return user !== null;
 }
+
+export async function getCurrentUser() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+  
+  const {data: publicUser, error: userError} = await supabase.schema('public').from('User').select('*').eq('id',user.id).single();
+  if (userError) {
+    console.error("Error fetching user from database:", userError);
+    return null;
+  }
+
+  return new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin, user.email ?? '', publicUser.bio);
+}

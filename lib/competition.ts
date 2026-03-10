@@ -1,9 +1,10 @@
-    /**
-     * @author mahberg
-     **/
-
 import { createClient } from "@/utils/supabase/client";
 import { UUID } from "crypto";
+import { getLikes, hasLiked } from "./likes";
+
+/**
+ * @author mahberg
+ **/
 
 export interface competition {
   id: string;
@@ -64,7 +65,7 @@ export async function participateCompetition({userID, competitionID}: {userID: s
     return {success: true, data};
 }
 
-export async function addAnimalToCompetition(animalID: string, competitionID: string, text?: string, species?: string) {
+export async function addAnimalToCompetition(animalID: string, competitionID: string, species: string, text?: string) {
   const supabase = createClient();
   const insertObj: any = { animal_id: animalID, competition_id: competitionID, species: species };
   if (text) insertObj.text = text;
@@ -76,6 +77,53 @@ export async function addAnimalToCompetition(animalID: string, competitionID: st
     return { success: false, error: error.message };
   }
   return { success: true, data };
+}
+
+export async function userInCompetition(userID: string, competitionID: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .schema("public")
+    .from("CompetitionUsers")
+    .select("*")
+    .eq("UserID", userID)
+    .eq("CompID", competitionID)
+    .maybeSingle();
+
+  if (error) {
+    return false;
+  }
+  return !!data;
+}
+
+export async function getAnimalsInCompetition(competitionID: string, userID: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("animal_in_competition")
+    .select("*, Animal(*)")
+    .eq("competition_id", competitionID);
+
+  console.log("animal_in_competition data", data, error)
+
+  if (error) {
+    console.error("Error fetching animals in competition:", error);
+    return [];
+  }
+
+  // For hver deltaker, hent likes og liked-status
+  const animalsWithLikes = await Promise.all(
+    (data || []).map(async (animal: any) => {
+      try {
+        const likes = await getLikes(animal.animal_id, animal.competition_id);
+        const liked = await hasLiked(userID, animal.animal_id, animal.competition_id);
+        return { ...animal, likes, liked };
+      } catch (error) {
+        console.error("Error fetching likes for animal:", animal.animal_id, error);
+        return { ...animal, likes: 0, liked: false };
+      }
+    })
+  );
+
+  return animalsWithLikes;
 }
 
 /**

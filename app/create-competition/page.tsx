@@ -40,7 +40,7 @@ export default function CreateCompetition() {
     <div className="fixed inset-0 flex bg-[#f5f2ef]">
       <Sidebar />
       <main className="flex-1 ml-50 overflow-y-auto p-8">
-        <CreateCompetitionForm />
+        <CreateCompetitionForm userID={''} />
       </main>
       <CopyWright />
     </div>

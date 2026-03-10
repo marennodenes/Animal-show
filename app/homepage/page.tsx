@@ -1,7 +1,7 @@
 'use client';
 
 import Sidebar from '@/components/shared/Sidebar';
-import NewPost from '@/components/HomePage/NewPost';
+import NewPost from '@/components/shared/NewPost';
 import CopyWright from '@/components/shared/CopyRight';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';

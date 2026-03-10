@@ -10,7 +10,7 @@ export default class Competition {
     start_date: string
     end_date: string
     created_at: Date
-    desctiption: string
+    description: string
     species?: string
     image_url?: string
 
@@ -20,7 +20,7 @@ export default class Competition {
         this.start_date = start_date;
         this.end_date = end_date;
         this.created_at = created_at;
-        this.desctiption = description;
+        this.description = description;
         this.species = species;
         this.image_url = image_url;
     }
