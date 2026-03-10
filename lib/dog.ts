@@ -128,3 +128,40 @@ export async function uploadAnimalImage(userId: string, image: File): Promise<st
   
   return publicUrl;
 }
+
+/**
+ * Upload profile picture to Supabase Storage (bucket: 'profile_picture') and return the public URL
+ */
+export async function uploadProfilePicture(userId: string, image: File): Promise<string | null> {
+  const supabase = createClient();
+  const fileExt = image.name.split('.').pop();
+  const fileName = `${userId}/${Date.now()}.${fileExt}`;
+  
+  const { error: uploadError } = await supabase.storage
+    .from('profile_picture')
+    .upload(fileName, image);
+
+  if (uploadError) {
+    console.error('Error uploading image:', uploadError);
+    return null;
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('profile_picture')
+    .getPublicUrl(fileName);
+  
+  return publicUrl;
+}
+/**
+ * Stores the profile picture URL in the User table for the given user
+ */
+export async function updateProfilePicture(userId: string, imageUrl: string | null) {
+  const supabase = createClient();
+  const {data, error} = await supabase.schema("public").from('User').update({ image_url: imageUrl }).eq('id', userId);
+
+  if (error) {
+    console.error('Error updating profile picture:', error);
+    return { success: false, error: error.message };
+  }
+  return { success: true, data };
+}

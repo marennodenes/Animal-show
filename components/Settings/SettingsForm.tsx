@@ -13,6 +13,7 @@ import { createClient } from '@/utils/supabase/client';
 import ErrorMessage from '@/components/shared/ErrorMessage';
 import SuccessMessage from '@/components/shared/SuccessMessage';
 import ProfilePictureUpload from './ProfilePictureUpload';
+import { uploadProfilePicture, updateProfilePicture } from '@/lib/dog';
 
 interface SettingsFormProps {
   userEmail: string;
@@ -96,6 +97,38 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
     }
   };
 
+  const handleImageChange = async (picture: File | null) => {
+    if (!picture) return;
+
+    setProfileImage(picture);
+    setSaving(true);
+    setError('');
+    setSuccess('');
+
+    let imageUrl: string | null = null;
+
+    try {
+
+      if (picture) {
+        imageUrl = await uploadProfilePicture(userId, picture);
+
+      if (!imageUrl) {
+        setError('Kunne ikke laste opp bilde');
+        return;
+      }
+    }
+
+    await updateProfilePicture(userId, imageUrl);
+    setSuccess('Profilbilde oppdatert!');
+  } 
+  catch (err) {
+    setError('Noe gikk galt. Prøv igjen.');
+  } 
+  finally {
+    setSaving(false);
+  }
+};
+
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -111,10 +144,10 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
 
       <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
           <ProfilePictureUpload
-            image={profileImage}
-            imageUrl={imageUrl}
-            onImageChange={setProfileImage}
-          />
+          image={profileImage}
+          imageUrl={imageUrl}
+          onImageChange={handleImageChange}
+        />
         </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
