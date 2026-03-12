@@ -92,40 +92,45 @@ return (
       {filteredCompetitions.map((comp, i) => (
         <div
           key={i}
-          className="bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl"
+          onClick={() => router.push(`/detailPage?id=${comp.id}`)}
+          className="bg-white border border-[#E5E7EB] rounded-2xl mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
         >
-          {/* Competition header */}
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
-            {/* Status badge */}
-            <span
-              className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold 
-                ${filter === 'upcoming'
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"}`}
-            >
-              {filter === 'upcoming' ? "Kommende" : "Ferdig"}
-            </span>
-          </div>
-          {/* Competition dates */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="px-3 py-1 rounded text-sm font-medium">
-              {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+          {/* Competition content */}
+          <div className="p-8">
+            {/* Competition header with name, date and badge */}
+            <div className="flex items-end gap-3 mb-4">
+              <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
+              {/* Competition dates */}
+              <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
+                {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+              </div>
+              {/* Status badge */}
+              <span
+                className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold 
+                  ${filter === 'upcoming'
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"}`}
+              >
+                {filter === 'upcoming' ? "Kommende" : "Ferdig"}
+              </span>
             </div>
+            
+            {/* Competition description */}
+            {comp.description && (
+              <div className="text-gray-700 mb-4">{comp.description}</div>
+            )}
           </div>
-          {/* Competition description */}
-          {comp.description && (
-            <div className="mb-4 text-gray-700">{comp.description}</div>
+          
+          {/* Competition Image */}
+          {comp.image_url && (
+            <div className="w-full h-64 bg-gray-200 overflow-hidden">
+              <img 
+                src={comp.image_url} 
+                alt={comp.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
-          {/* View competition button */}
-          <div className="mt-auto flex justify-end w-full">
-            <button
-              onClick={() => router.push(`/detailPage?id=${comp.id}`)}
-              className="bg-[#7EACB5] hover:bg-[#6898A5] text-white text-lg font-semibold py-3 px-8 rounded-xl shadow transition-all duration-200 border-2 border-[#7EACB5] hover:scale-105"
-            >
-              Se konkurranse
-            </button>
-          </div>
         </div>
       ))}
     </div>

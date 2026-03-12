@@ -164,3 +164,42 @@ export async function uploadCompetitionImage(userId: string, image: File): Promi
   
   return publicUrl;
 }
+
+/**
+ * Get all active competitions that the user is participating in and the competition has not ended.
+ */
+export async function getUserActiveCompetitions(userID: string) {
+  const supabase = createClient();
+  
+  // Get all competitions where the user is registered
+  const { data: userCompetitions, error: userCompError } = await supabase
+    .from("CompetitionUsers")
+    .select("CompID")
+    .eq("UserID", userID);
+    
+  if (userCompError) {
+    console.error("Error fetching user competitions:", userCompError);
+    return [];
+  }
+  
+  if (!userCompetitions || userCompetitions.length === 0) {
+    return [];
+  }
+  
+  const competitionIds = userCompetitions.map(uc => uc.CompID);
+  
+  // Get competition details, filtering out ended competitions
+  const { data: competitions, error: compError } = await supabase
+    .from("Competition")
+    .select("*")
+    .in("id", competitionIds)
+    .gte("end_date", new Date().toISOString())
+    .order("end_date", { ascending: true });
+    
+  if (compError) {
+    console.error("Error fetching competitions:", compError);
+    return [];
+  }
+  
+  return competitions || [];
+}
