@@ -39,6 +39,21 @@ export async function getCompetitionById(id: UUID) {
     return {success: true, data}; 
 }
 
+//getCompetitionByUser - Get all Competitions for user
+export async function getCompetitionByUser(userID: string) {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .schema("public")
+    .from("CompetitionUsers")
+    .select(`*,Competition (*)`)
+    .eq("UserID", userID);
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  return { success: true, data };
+}
+
+
 // createCompetition - insert a newly created competition in the database
 export async function createCompetition({name, start_date, end_date, description, species, image_url}: 
     { name: string; start_date: string; end_date: string; description: string; species?: string; image_url: string | null }) {
