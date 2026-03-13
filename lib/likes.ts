@@ -27,6 +27,7 @@ export async function getLikes(animal_id: string, competition_id: string) {
   }
 }
 
+
 // check if user has liked an animal in one competition 
 export async function hasLiked(user_id: string, animal_id: string, competition_id: string) {
   const supabase = createClient();
