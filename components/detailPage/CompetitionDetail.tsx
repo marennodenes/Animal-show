@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Users } from "lucide-react";
 import { getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
@@ -127,7 +128,14 @@ const isCompetitionActive = competition && new Date(competition.start_date) <= t
 
   return (
     !competition ? null : (<div>
-      <h1 className="text-3xl font-bold mb-4">{competition.name}</h1>
+      <div className="flex items-center gap-4 mb-4">
+        <h1 className="text-3xl font-bold">{competition.name}</h1>
+        {/* Participant count badge */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 border border-gray-200">
+          <Users size={18} className="text-gray-500" />
+          <span>{animals.length} deltakere</span>
+        </div>
+      </div>
       <p>
         <strong>Periode:</strong>{" "}
         {new Date(competition.start_date).toLocaleDateString("nb-NO", {

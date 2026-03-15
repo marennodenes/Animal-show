@@ -1,9 +1,9 @@
 
 'use client';
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getAllCompetitions, participateCompetition } from '@/lib/competition';
+import { getAllCompetitions, getParticipantCount } from '@/lib/competition';
 import Competition from '@/lib/models/Competition'; 
 
 export default function NewCompetition() {
@@ -11,6 +11,7 @@ export default function NewCompetition() {
   const router = useRouter();
   
   const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [participantCounts, setParticipantCounts] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
 
   const [filter, setFilter] = useState<'upcoming' | 'active' | 'past'>('active');
@@ -22,7 +23,18 @@ export default function NewCompetition() {
     async function loadCompetitions() {
       const result = await getAllCompetitions();
       if (result.success) {
-        setCompetitions(result.data || []);
+        const comps = result.data || [];
+        setCompetitions(comps);
+        
+        // Load participant counts for all competitions
+        const counts: { [key: string]: number } = {};
+        await Promise.all(
+          comps.map(async (comp) => {
+            const count = await getParticipantCount(comp.id);
+            counts[comp.id] = count;
+          })
+        );
+        setParticipantCounts(counts);
       }
       setLoading(false);
     }
@@ -146,6 +158,11 @@ return (
               {/* Competition dates */}
               <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
                 {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+              </div>
+              {/* Participant count */}
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+                <Users size={16} className="text-gray-500" />
+                <span>{participantCounts[comp.id] || 0} deltakere</span>
               </div>
               {/* Status badge */}
               <span

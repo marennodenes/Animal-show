@@ -40,17 +40,51 @@ export async function getCompetitionById(id: UUID) {
 }
 
 //getCompetitionByUser - Get all Competitions for user
-export async function getCompetitionByUser(userID: string) {
+// filterType: 'all' | 'active' | 'not-ended'
+export async function getCompetitionByUser(userID: string, filterType: 'all' | 'active' | 'not-ended' = 'all') {
   const supabase = createClient();
+  
+  // First get all competitions for the user
   const { data, error } = await supabase
     .schema("public")
     .from("CompetitionUsers")
     .select(`*,Competition (*)`)
     .eq("UserID", userID);
+  
   if (error) {
     return { success: false, error: error.message };
   }
-  return { success: true, data };
+  
+  // Filter on the client side based on filterType
+  if (!data) {
+    return { success: true, data: [] };
+  }
+  
+  let filteredData = data;
+  
+  if (filterType === 'not-ended') {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    filteredData = data.filter((item: any) => {
+      if (!item.Competition) return false;
+      const endDate = new Date(item.Competition.end_date);
+      endDate.setHours(23, 59, 59, 999);
+      return endDate >= today;
+    });
+  } else if (filterType === 'active') {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    filteredData = data.filter((item: any) => {
+      if (!item.Competition) return false;
+      const startDate = new Date(item.Competition.start_date);
+      const endDate = new Date(item.Competition.end_date);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      return startDate <= today && endDate >= today;
+    });
+  }
+  
+  return { success: true, data: filteredData };
 }
 
 
@@ -166,40 +200,20 @@ export async function uploadCompetitionImage(userId: string, image: File): Promi
 }
 
 /**
- * Get all active competitions that the user is participating in and the competition has not ended.
+ * Get the count of unique animals participating in a competition
  */
-export async function getUserActiveCompetitions(userID: string) {
+export async function getParticipantCount(competitionID: string): Promise<number> {
   const supabase = createClient();
   
-  // Get all competitions where the user is registered
-  const { data: userCompetitions, error: userCompError } = await supabase
-    .from("CompetitionUsers")
-    .select("CompID")
-    .eq("UserID", userID);
+  const { count, error } = await supabase
+    .from("animal_in_competition")
+    .select("animal_id", { count: 'exact', head: true })
+    .eq("competition_id", competitionID);
     
-  if (userCompError) {
-    console.error("Error fetching user competitions:", userCompError);
-    return [];
+  if (error) {
+    console.error("Error counting participants:", error);
+    return 0;
   }
   
-  if (!userCompetitions || userCompetitions.length === 0) {
-    return [];
-  }
-  
-  const competitionIds = userCompetitions.map(uc => uc.CompID);
-  
-  // Get competition details, filtering out ended competitions
-  const { data: competitions, error: compError } = await supabase
-    .from("Competition")
-    .select("*")
-    .in("id", competitionIds)
-    .gte("end_date", new Date().toISOString())
-    .order("end_date", { ascending: true });
-    
-  if (compError) {
-    console.error("Error fetching competitions:", compError);
-    return [];
-  }
-  
-  return competitions || [];
+  return count || 0;
 }
