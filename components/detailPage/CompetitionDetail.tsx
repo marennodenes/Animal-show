@@ -115,18 +115,18 @@ export default function CompetitionDetail({
       await likeAnimal(user.id, animal_id, competition_id);
     }
 
-  // Oppdater kun det aktuelle dyret i state:
-  const likes = await getLikes(animal_id, competition_id);
-  const userHasLiked = await hasLiked(user.id, animal_id, competition_id);
+    // Oppdater kun det aktuelle dyret i state:
+    const likes = await getLikes(animal_id, competition_id);
+    const userHasLiked = await hasLiked(user.id, animal_id, competition_id);
 
     setAnimals(prev =>
       prev.map(animal =>
         animal.animal_id === animal_id
           ? { ...animal, likes, liked: userHasLiked }
           : animal
-    )
-  );
-}
+      )
+    );
+  }
 
   async function handleDeletePost(animal_id: string, competition_id: string) {
     if (!user) return;
@@ -291,43 +291,45 @@ export default function CompetitionDetail({
           .filter(animalInCompetition => animalInCompetition.Animal)
           .sort((a, b) => b.likes - a.likes) //only the animals in database
           .map(animalInCompetition => {
-          const animalData = animalInCompetition.Animal;
-          if (!animalData) {
-            return null;
-          }
+            const animalData = animalInCompetition.Animal;
+            if (!animalData) {
+              return null;
+            }
 
-          const canDeletePost =
-            user?.is_admin === true || animalData.user_id === user?.id;
-          const postKey = `${animalInCompetition.competition_id}:${animalInCompetition.animal_id}`;
+            const canDeletePost =
+              user?.is_admin === true || animalData.user_id === user?.id;
+            const postKey = `${animalInCompetition.competition_id}:${animalInCompetition.animal_id}`;
 
-          return (
-            <AnimalCompetitionCard
-              key={animalInCompetition.animal_id}
-              animal={{
-                ...animalData,
-                text: animalInCompetition.text ?? undefined,
-                liked: animalInCompetition.liked,
-                likes: animalInCompetition.likes,
-              }}
-              canDelete={canDeletePost}
-              isDeleting={deletingPostKey === postKey}
-              //onlike sends animal_id, competition_id and liked status to handleLike function
-              onLike={() =>
-                handleLike(
-                  animalInCompetition.animal_id,
-                  animalInCompetition.competition_id,
-                  animalInCompetition.liked
-                )
-              }
-              onDelete={() =>
-                handleDeletePost(
-                  animalInCompetition.animal_id,
-                  animalInCompetition.competition_id
-                )
-              }
-            />
-          );
-        })}
+            return (
+              <AnimalCompetitionCard
+                key={animalInCompetition.animal_id}
+                animal={{
+                  ...animalData,
+                  text: animalInCompetition.text ?? undefined,
+                  liked: animalInCompetition.liked,
+                  likes: animalInCompetition.likes,
+                  competition_id: animalInCompetition.competition_id,
+                  comment_count: animalInCompetition.comment_count,
+                }}
+                canDelete={canDeletePost}
+                isDeleting={deletingPostKey === postKey}
+                //onlike sends animal_id, competition_id and liked status to handleLike function
+                onLike={() =>
+                  handleLike(
+                    animalInCompetition.animal_id,
+                    animalInCompetition.competition_id,
+                    animalInCompetition.liked
+                  )
+                }
+                onDelete={() =>
+                  handleDeletePost(
+                    animalInCompetition.animal_id,
+                    animalInCompetition.competition_id
+                  )
+                }
+              />
+            );
+          })}
       </div>
     </div>
     )

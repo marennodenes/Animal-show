@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Heart, Trash2, MessageCircle } from "lucide-react";
+import CommentsPage from "./CommentsPage";
 
 interface AnimalCompetitionCardProps {
   animal: {
+    id: string;
     name: string;
     breed?: string;
     age?: number;
@@ -9,10 +12,10 @@ interface AnimalCompetitionCardProps {
     likes?: number;
     liked?: boolean;
     text?: string;
-    comments?: number;
+    competition_id: string;
+    comment_count?: number;
   };
   onLike?: () => void;
-  onComment?: () => void;
   onDelete?: () => void;
   canDelete?: boolean;
   isDeleting?: boolean;
@@ -21,11 +24,12 @@ interface AnimalCompetitionCardProps {
 export default function AnimalCompetitionCard({
   animal,
   onLike,
-  onComment,
   onDelete,
   canDelete = false,
   isDeleting = false,
 }: AnimalCompetitionCardProps) {
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+
   return (
     <div className="relative flex flex-col items-center py-4">
       <div className="w-full h-65 bg-gray-100 flex items-center justify-center overflow-hidden mb-3">
@@ -63,12 +67,12 @@ export default function AnimalCompetitionCard({
           </button>
           <button
             className="flex items-center gap-1 text-gray-400 hover:text-gray-500 transition"
-            onClick={onComment}
+            onClick={() => setIsCommentsOpen(true)}
             type="button"
             aria-label="Se kommentarer"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{animal.comments || 0}</span>
+            <span className="text-sm">{animal.comment_count || 0}</span>
           </button>
           {canDelete && (
             <button
@@ -84,6 +88,13 @@ export default function AnimalCompetitionCard({
           )}
         </div>
       </div>
+      {isCommentsOpen && (
+        <CommentsPage
+          animal_id={animal.id}
+          competition_id={animal.competition_id}
+          onClose={() => setIsCommentsOpen(false)}
+        />
+      )}
     </div>
   );
 }
