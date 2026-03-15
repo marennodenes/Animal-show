@@ -66,3 +66,10 @@ export async function unlikeAnimal(user_id: string, animal_id: string, competiti
   if (error) throw error;
   return true;
 }
+
+export async function getMostLikedUserID() {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('get_most_liked_user_id');
+  if (error) throw error;
+  return data as string;
+}
