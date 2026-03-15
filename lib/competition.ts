@@ -95,6 +95,51 @@ export async function createCompetition({name, start_date, end_date, description
     return {success: true, data};
 }
 
+export async function updateCompetition({
+  id,
+  name,
+  start_date,
+  end_date,
+  description,
+  species,
+  image_url,
+}: {
+  id: string;
+  name: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+  species?: string;
+  image_url?: string | null;
+}) {
+  const supabase = createClient();
+  const updatePayload: {
+    name: string;
+    start_date: string;
+    end_date: string;
+    description: string;
+    species?: string;
+    image_url?: string | null;
+  } = { name, start_date, end_date, description, species };
+
+  if (image_url !== undefined) {
+    updatePayload.image_url = image_url;
+  }
+
+  const { data, error } = await supabase
+    .schema("public")
+    .from("Competition")
+    .update(updatePayload)
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error updating competition:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, data };
+}
+
 export async function participateCompetition({userID, competitionID}: {userID: string, competitionID: string}) {
     const supabase = createClient();
     const { data, error } = await supabase.schema("public").from("CompetitionUsers").insert([{UserID: userID, CompID: competitionID}]);

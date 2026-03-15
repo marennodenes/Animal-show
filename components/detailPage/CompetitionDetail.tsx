@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { AnimalInCompetitionRow, deleteAnimalFromCompetition, deleteCompetition, getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
@@ -192,16 +192,27 @@ export default function CompetitionDetail({
       <div className="mb-4 flex items-center gap-3">
         <h1 className="text-3xl font-bold">{competition.name}</h1>
         {user?.is_admin === true && (
-          <button
-            type="button"
-            onClick={handleDeleteCompetition}
-            disabled={isDeletingCompetition}
-            className="rounded-full p-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-            aria-label="Slett konkurranse"
-            title="Slett konkurranse"
-          >
-            <Trash2 className={`h-5 w-5 ${isDeletingCompetition ? "animate-pulse" : ""}`} />
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => router.push(`/edit-competition?id=${competition.id}`)}
+              className="rounded-full p-2 text-[#7EACB5] transition hover:bg-[#E6F1F3]"
+              aria-label="Rediger konkurranse"
+              title="Rediger konkurranse"
+            >
+              <Pencil className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteCompetition}
+              disabled={isDeletingCompetition}
+              className="rounded-full p-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              aria-label="Slett konkurranse"
+              title="Slett konkurranse"
+            >
+              <Trash2 className={`h-5 w-5 ${isDeletingCompetition ? "animate-pulse" : ""}`} />
+            </button>
+          </>
         )}
       </div>
       <p>
