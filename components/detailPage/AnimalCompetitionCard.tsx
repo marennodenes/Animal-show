@@ -5,7 +5,7 @@ interface AnimalCompetitionCardProps {
     name: string;
     breed?: string;
     age?: number;
-    image_url?: string;
+    image_url?: string | null;
     likes?: number;
     liked?: boolean;
     text?: string;

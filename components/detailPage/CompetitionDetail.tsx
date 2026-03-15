@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import { AnimalInCompetitionRow, deleteAnimalFromCompetition, getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import { AnimalInCompetitionRow, deleteAnimalFromCompetition, deleteCompetition, getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
 import { likeAnimal, unlikeAnimal, hasLiked, getLikes } from "@/lib/likes";
@@ -36,11 +38,13 @@ export default function CompetitionDetail({
   onAnimalsChange?: () => void;
   refreshTrigger?: number;
 }) {
+  const router = useRouter();
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [isParticipating, setIsParticipating] = useState(false);
   const [animals, setAnimals] = useState<AnimalInCompetitionRow[]>([]);
   const [user] = useState<CurrentUser | null>(getStoredUser);
   const [deletingPostKey, setDeletingPostKey] = useState<string | null>(null);
+  const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
 
   // Collect competition ID from URL, f.eks. /detailPage?id=123
   useEffect(() => {
@@ -150,6 +154,28 @@ export default function CompetitionDetail({
     setDeletingPostKey(null);
   }
 
+  async function handleDeleteCompetition() {
+    if (!competition?.id || user?.is_admin !== true) {
+      return;
+    }
+
+    const confirmed = window.confirm("Er du sikker på at du vil slette denne konkurransen?");
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeletingCompetition(true);
+    const result = await deleteCompetition(competition.id);
+
+    if (!result.success) {
+      alert(result.error || "Kunne ikke slette konkurransen.");
+      setIsDeletingCompetition(false);
+      return;
+    }
+
+    router.push("/competitions");
+  }
+
   //get animals with likes aswell
   useEffect(() => {
     if (competition?.id && user?.id) {
@@ -163,7 +189,21 @@ export default function CompetitionDetail({
 
   return (
     !competition ? null : (<div>
-      <h1 className="text-3xl font-bold mb-4">{competition.name}</h1>
+      <div className="mb-4 flex items-center gap-3">
+        <h1 className="text-3xl font-bold">{competition.name}</h1>
+        {user?.is_admin === true && (
+          <button
+            type="button"
+            onClick={handleDeleteCompetition}
+            disabled={isDeletingCompetition}
+            className="rounded-full p-2 text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="Slett konkurranse"
+            title="Slett konkurranse"
+          >
+            <Trash2 className={`h-5 w-5 ${isDeletingCompetition ? "animate-pulse" : ""}`} />
+          </button>
+        )}
+      </div>
       <p>
         <strong>Periode:</strong>{" "}
         {new Date(competition.start_date).toLocaleDateString("nb-NO", {
@@ -210,16 +250,21 @@ export default function CompetitionDetail({
         .filter(animalInCompetition => animalInCompetition.Animal)
         .sort((a, b) => b.likes - a.likes) //only the animals in database
         .map(animalInCompetition => {
+          const animalData = animalInCompetition.Animal;
+          if (!animalData) {
+            return null;
+          }
+
           const canDeletePost =
-            user?.is_admin === true || animalInCompetition.Animal.user_id === user?.id;
+            user?.is_admin === true || animalData.user_id === user?.id;
           const postKey = `${animalInCompetition.competition_id}:${animalInCompetition.animal_id}`;
 
           return (
           <AnimalCompetitionCard
           key={animalInCompetition.animal_id}
           animal={{
-            ...animalInCompetition.Animal,
-            text: animalInCompetition.text,
+            ...animalData,
+            text: animalInCompetition.text ?? undefined,
             liked: animalInCompetition.liked,
             likes: animalInCompetition.likes,
           }}

@@ -27,6 +27,20 @@ export interface AnimalInCompetitionRow {
   Animal: Animal | null;
 }
 
+function getErrorMessage(error: unknown): string | null {
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.length > 0
+  ) {
+    return error.message;
+  }
+
+  return null;
+}
+
 // getAllCompetitions - get all competitions from the database ordered by end date
 export async function getAllCompetitions() {
 const supabase = createClient();
@@ -119,9 +133,10 @@ export async function deleteAnimalFromCompetition(animalID: string, competitionI
     .eq("animal_id", animalID)
     .eq("competition_id", competitionID);
 
-  if (likesError) {
-    console.error("Error deleting likes for animal in competition:", likesError);
-    return { success: false, error: likesError.message };
+  const likesErrorMessage = getErrorMessage(likesError);
+  if (likesErrorMessage) {
+    console.warn("Error deleting likes for animal in competition:", likesErrorMessage);
+    return { success: false, error: likesErrorMessage };
   }
 
   const { error } = await supabase
@@ -130,9 +145,62 @@ export async function deleteAnimalFromCompetition(animalID: string, competitionI
     .eq("animal_id", animalID)
     .eq("competition_id", competitionID);
 
-  if (error) {
-    console.error("Error deleting animal from competition:", error);
-    return { success: false, error: error.message };
+  const deleteErrorMessage = getErrorMessage(error);
+  if (deleteErrorMessage) {
+    console.warn("Error deleting animal from competition:", deleteErrorMessage);
+    return { success: false, error: deleteErrorMessage };
+  }
+
+  return { success: true };
+}
+
+export async function deleteCompetition(competitionID: string) {
+  const supabase = createClient();
+
+  const { error: likesError } = await supabase
+    .from("likes")
+    .delete()
+    .eq("competition_id", competitionID);
+
+  const likesErrorMessage = getErrorMessage(likesError);
+  if (likesErrorMessage) {
+    console.warn("Error deleting likes for competition:", likesErrorMessage);
+    return { success: false, error: likesErrorMessage };
+  }
+
+  const { error: animalsError } = await supabase
+    .from("animal_in_competition")
+    .delete()
+    .eq("competition_id", competitionID);
+
+  const animalsErrorMessage = getErrorMessage(animalsError);
+  if (animalsErrorMessage) {
+    console.warn("Error deleting competition posts:", animalsErrorMessage);
+    return { success: false, error: animalsErrorMessage };
+  }
+
+  const { error: usersError } = await supabase
+    .schema("public")
+    .from("CompetitionUsers")
+    .delete()
+    .eq("CompID", competitionID);
+
+  const usersErrorMessage = getErrorMessage(usersError);
+  if (usersErrorMessage) {
+    console.warn("Error deleting competition participants:", usersErrorMessage);
+    return { success: false, error: usersErrorMessage };
+  }
+
+  const { error } = await supabase
+    .schema("public")
+    .from("Competition")
+    .delete()
+    .eq("id", competitionID);
+
+  const competitionErrorMessage = getErrorMessage(error);
+  if (competitionErrorMessage) {
+    console.warn("Error deleting competition:", competitionErrorMessage);
+    return { success: false, error: competitionErrorMessage };
   }
 
   return { success: true };
