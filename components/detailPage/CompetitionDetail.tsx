@@ -1,31 +1,49 @@
 'use client'
 
-import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
+import { useEffect, useState } from "react";
+import { AnimalInCompetitionRow, deleteAnimalFromCompetition, getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
 import { likeAnimal, unlikeAnimal, hasLiked, getLikes } from "@/lib/likes";
 
-export default function CompetitionDetail({ onAnimalsChange }: { onAnimalsChange?: () => void }) {
-  const router = useRouter();
-  const [competition, setCompetition] = useState<any>(null);
-  const [isParticipating, setIsParticipating] = useState(false);
-  const [animals, setAnimals] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
+type CurrentUser = {
+  id: string;
+  is_admin?: boolean;
+};
 
-  // Initialize user from sessionStorage once
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userJson = sessionStorage.getItem("user");
-      if (userJson) {
-        setUser(JSON.parse(userJson));
-      }
-    }
-  }, []);
+function getStoredUser(): CurrentUser | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const userJson = sessionStorage.getItem("user");
+  if (!userJson) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(userJson) as CurrentUser;
+  } catch (error) {
+    console.error("Could not parse user from sessionStorage:", error);
+    return null;
+  }
+}
+
+export default function CompetitionDetail({
+  onAnimalsChange,
+  refreshTrigger = 0,
+}: {
+  onAnimalsChange?: () => void;
+  refreshTrigger?: number;
+}) {
+  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [isParticipating, setIsParticipating] = useState(false);
+  const [animals, setAnimals] = useState<AnimalInCompetitionRow[]>([]);
+  const [user] = useState<CurrentUser | null>(getStoredUser);
+  const [deletingPostKey, setDeletingPostKey] = useState<string | null>(null);
 
   // Collect competition ID from URL, f.eks. /detailPage?id=123
-    useEffect(() => {
+  useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("id");
     if (!id) return;
@@ -52,20 +70,16 @@ export default function CompetitionDetail({ onAnimalsChange }: { onAnimalsChange
         }
     };
     fetchCompetition();
-    }, []);
+  }, []);
 
-    useEffect(() => {
-    console.log("Fetched competition:", competition);
-    }, [competition]);
-
-    // Check if user is participating
+  // Check if user is participating
   useEffect(() => {
-    if (user && competition && competition.id) {
-        userInCompetition(user.id, competition.id).then(result => {
+    if (user?.id && competition?.id) {
+      userInCompetition(user.id, competition.id).then(result => {
         setIsParticipating(result);
-        });
+      });
     }
-    }, [user, competition?.id]);
+  }, [user?.id, competition?.id]);
 
   const handleParticipate = async (competitionID: string) => {
   if (!user || isParticipating) return;
@@ -101,25 +115,51 @@ export default function CompetitionDetail({ onAnimalsChange }: { onAnimalsChange
   const likes = await getLikes(animal_id, competition_id);
   const userHasLiked = await hasLiked(user.id, animal_id, competition_id);
 
-  setAnimals(prev =>
-    prev.map(animal =>
-      animal.animal_id === animal_id
-        ? { ...animal, likes, liked: userHasLiked }
-        : animal
+    setAnimals(prev =>
+      prev.map(animal =>
+        animal.animal_id === animal_id
+          ? { ...animal, likes, liked: userHasLiked }
+          : animal
     )
   );
 }
 
+  async function handleDeletePost(animal_id: string, competition_id: string) {
+    if (!user) return;
+
+    const confirmed = window.confirm("Er du sikker på at du vil slette dette innlegget?");
+    if (!confirmed) return;
+
+    const postKey = `${competition_id}:${animal_id}`;
+    setDeletingPostKey(postKey);
+
+    const result = await deleteAnimalFromCompetition(animal_id, competition_id);
+
+    if (!result.success) {
+      alert(result.error || "Kunne ikke slette innlegget.");
+      setDeletingPostKey(null);
+      return;
+    }
+
+    setAnimals(prev =>
+      prev.filter(
+        animal =>
+          !(animal.animal_id === animal_id && animal.competition_id === competition_id)
+      )
+    );
+    setDeletingPostKey(null);
+  }
+
   //get animals with likes aswell
   useEffect(() => {
-  if (competition && competition.id && user && user.id) {
-    getAnimalsInCompetition(competition.id, user.id).then((animals) => {
-      setAnimals(animals);
-    });
-  }
-}, [competition?.id, user?.id, onAnimalsChange]);
+    if (competition?.id && user?.id) {
+      getAnimalsInCompetition(competition.id, user.id).then((animalsInCompetition) => {
+        setAnimals(animalsInCompetition);
+      });
+    }
+  }, [competition?.id, user?.id, refreshTrigger]);
 
-const isCompetitionOver = competition && new Date() > new Date(competition.end_date);
+  const isCompetitionOver = competition ? new Date() > new Date(competition.end_date) : false;
 
   return (
     !competition ? null : (<div>
@@ -169,7 +209,12 @@ const isCompetitionOver = competition && new Date() > new Date(competition.end_d
         {animals
         .filter(animalInCompetition => animalInCompetition.Animal)
         .sort((a, b) => b.likes - a.likes) //only the animals in database
-        .map(animalInCompetition => (
+        .map(animalInCompetition => {
+          const canDeletePost =
+            user?.is_admin === true || animalInCompetition.Animal.user_id === user?.id;
+          const postKey = `${animalInCompetition.competition_id}:${animalInCompetition.animal_id}`;
+
+          return (
           <AnimalCompetitionCard
           key={animalInCompetition.animal_id}
           animal={{
@@ -178,6 +223,8 @@ const isCompetitionOver = competition && new Date() > new Date(competition.end_d
             liked: animalInCompetition.liked,
             likes: animalInCompetition.likes,
           }}
+          canDelete={canDeletePost}
+          isDeleting={deletingPostKey === postKey}
           //onlike sends animal_id, competition_id and liked status to handleLike function
           onLike={() =>
               handleLike(
@@ -186,8 +233,15 @@ const isCompetitionOver = competition && new Date() > new Date(competition.end_d
                 animalInCompetition.liked
               )
             }
+          onDelete={() =>
+              handleDeletePost(
+                animalInCompetition.animal_id,
+                animalInCompetition.competition_id
+              )
+            }
           />
-        ))}
+          );
+        })}
       </div>
     </div>
       )

@@ -47,7 +47,10 @@ export default function DetailPage() {
     <div className="fixed inset-0 flex bg-[#f5f2ef]">
       <Sidebar />
       <main className="flex-1 ml-50 overflow-y-auto p-8">
-        <CompetitionDetail onAnimalsChange={() => setRefreshTrigger(prev => prev + 1)} />
+        <CompetitionDetail
+          refreshTrigger={refreshTrigger}
+          onAnimalsChange={() => setRefreshTrigger(prev => prev + 1)}
+        />
         {(inCompetition && !competitionDone) ? 
           <NewPost 
             defaultCompetitionId={competitionId} 

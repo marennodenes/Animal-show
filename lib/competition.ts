@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { UUID } from "crypto";
 import { getLikes, hasLiked } from "./likes";
+import Animal from "./models/Animals";
 
 /**
  * @author mahberg
@@ -14,6 +15,16 @@ export interface competition {
   image_url: string | null;
   description: string;
   species: string;
+}
+
+export interface AnimalInCompetitionRow {
+  animal_id: string;
+  competition_id: string;
+  species: string;
+  text?: string | null;
+  likes: number;
+  liked: boolean;
+  Animal: Animal | null;
 }
 
 // getAllCompetitions - get all competitions from the database ordered by end date
@@ -82,7 +93,12 @@ export async function participateCompetition({userID, competitionID}: {userID: s
 
 export async function addAnimalToCompetition(animalID: string, competitionID: string, species: string, text?: string) {
   const supabase = createClient();
-  const insertObj: any = { animal_id: animalID, competition_id: competitionID, species: species };
+  const insertObj: {
+    animal_id: string;
+    competition_id: string;
+    species: string;
+    text?: string;
+  } = { animal_id: animalID, competition_id: competitionID, species };
   if (text) insertObj.text = text;
   const { data, error } = await supabase
     .from("animal_in_competition")
@@ -92,6 +108,34 @@ export async function addAnimalToCompetition(animalID: string, competitionID: st
     return { success: false, error: error.message };
   }
   return { success: true, data };
+}
+
+export async function deleteAnimalFromCompetition(animalID: string, competitionID: string) {
+  const supabase = createClient();
+
+  const { error: likesError } = await supabase
+    .from("likes")
+    .delete()
+    .eq("animal_id", animalID)
+    .eq("competition_id", competitionID);
+
+  if (likesError) {
+    console.error("Error deleting likes for animal in competition:", likesError);
+    return { success: false, error: likesError.message };
+  }
+
+  const { error } = await supabase
+    .from("animal_in_competition")
+    .delete()
+    .eq("animal_id", animalID)
+    .eq("competition_id", competitionID);
+
+  if (error) {
+    console.error("Error deleting animal from competition:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 export async function userInCompetition(userID: string, competitionID: string): Promise<boolean> {
@@ -125,8 +169,8 @@ export async function getAnimalsInCompetition(competitionID: string, userID: str
   }
 
   // For hver deltaker, hent likes og liked-status
-  const animalsWithLikes = await Promise.all(
-    (data || []).map(async (animal: any) => {
+  const animalsWithLikes: AnimalInCompetitionRow[] = await Promise.all(
+    ((data || []) as Omit<AnimalInCompetitionRow, "likes" | "liked">[]).map(async (animal) => {
       try {
         const likes = await getLikes(animal.animal_id, animal.competition_id);
         const liked = await hasLiked(userID, animal.animal_id, animal.competition_id);
