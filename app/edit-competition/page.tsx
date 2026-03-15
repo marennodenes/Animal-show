@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CopyWright from '@/components/shared/CopyRight';
 import Sidebar from '@/components/shared/Sidebar';
-import EditCompetitionForm from '@/components/EditCompetitionPage/EditCompetitionForm';
+import EditCompetitionForm from '@/components/CompetitionPage/EditCompetitionForm';
 import { isLoggedIn } from '@/lib/auth';
 
 export default function EditCompetitionPage() {
@@ -12,6 +12,7 @@ export default function EditCompetitionPage() {
   const searchParams = useSearchParams();
   const competitionId = searchParams.get('id') ?? '';
   const [isAllowed, setIsAllowed] = useState(false);
+  const [userId, setUserId] = useState('');
 
   useEffect(() => {
     async function checkAccess() {
@@ -28,6 +29,7 @@ export default function EditCompetitionPage() {
         return;
       }
 
+      setUserId(user.id || '');
       setIsAllowed(true);
     }
 
@@ -38,7 +40,7 @@ export default function EditCompetitionPage() {
     <div className="fixed inset-0 flex bg-[#f5f2ef]">
       <Sidebar />
       <main className="flex-1 ml-50 overflow-y-auto p-8">
-        {isAllowed ? <EditCompetitionForm competitionId={competitionId} /> : null}
+        {isAllowed ? <EditCompetitionForm competitionId={competitionId} userID={userId} /> : null}
       </main>
       <CopyWright />
     </div>
