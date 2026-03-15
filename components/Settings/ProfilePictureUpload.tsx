@@ -2,7 +2,7 @@
  * Profile Picture Upload Component
  */
 
-import { UserPen, Camera } from 'lucide-react';
+import { User, Camera } from 'lucide-react';
 
 interface ProfilePictureUploadProps {
   image: File | null;
@@ -27,7 +27,7 @@ export default function ProfilePictureUpload({
   return (
     <div className="flex flex-col items-center mb-6">
       <div className="relative">
-        <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#7EACB5] to-[#6898A5] flex items-center justify-center overflow-hidden shadow-md">
           {image ? (
             <img
               src={URL.createObjectURL(image)}
@@ -41,7 +41,7 @@ export default function ProfilePictureUpload({
               className="w-full h-full object-cover"
             />
           ) : (
-            <UserPen className="w-16 h-16 text-gray-400" />
+            <User className="w-16 h-16 text-white" strokeWidth={1.5} />
           )}
         </div>
         <label
