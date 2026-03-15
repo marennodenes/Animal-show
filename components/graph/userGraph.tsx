@@ -18,13 +18,19 @@ export default function UserGraph() {
 
     return (
         <div className='text-left'>
-            <h2 className=''>Brukere lagd over tid</h2>
+            <h2 className='text-xl font-bold mb-4 text-gray-800'>Brukere lagd over tid</h2>
             <ResponsiveContainer width="60%" height={300}>
                 <LineChart data={data}>
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="amount" stroke="#8884d8" />
+                    <XAxis 
+                        dataKey="date"
+                    />
+                    <YAxis/>
+                    <Tooltip/>
+                    <Line 
+                        type="monotone" 
+                        dataKey="amount" 
+                        stroke="#7EACB5"
+                    />
                 </LineChart>
             </ResponsiveContainer>
         </div>
