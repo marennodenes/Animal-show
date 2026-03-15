@@ -19,24 +19,47 @@ export default function MyCompetitions() {
       const result = await getCompetitionByUser(user.id);
       if (result.success) {
         const comps = (result.data || []).map((item: any) => item.Competition);
-        const upcoming = comps.filter(
-          (comp) => new Date(comp.end_date) >= new Date()
-        );
-        setCompetitions(upcoming);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const active = comps.filter((comp) => {
+          const startDate = new Date(comp.start_date);
+          const endDate = new Date(comp.end_date);
+          startDate.setHours(0, 0, 0, 0);
+          endDate.setHours(23, 59, 59, 999);
+          return startDate <= today && endDate >= today;
+        });
+        setCompetitions(active);
       }
       setLoading(false);
     }
     loadCompetitions();
   }, []);
 
+  // Reload competitions at midnight when date changes
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    
+    const timer = setTimeout(() => {
+      // Reload page at midnight to refresh competition status
+      window.location.reload();
+    }, msUntilMidnight);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return(
     <div className="flex flex-col items-center w-full px-4 py-8">
       <div className="w-full max-w-3xl">
-      <h1 className="text-3xl font-bold text-center mb-8">Dine kommende konkurranser</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">Dine aktive konkurranser</h1>
         {/* Hvis ingen competitions */}
         {!loading && competitions.length === 0 && (
         <div className="text-center text-gray-400 my-8">
-            Du er ikke påmeldt noen kommende konkurranser.
+            Du er ikke påmeldt noen aktive konkurranser.
           </div>
         )}
         {/* Display competition cards  */}
@@ -47,8 +70,8 @@ export default function MyCompetitions() {
           >
             <div className="flex items-center gap-3 mb-2">
               <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
-              <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                Kommende
+              <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                Aktiv
               </span>
             </div>
             <div className="flex items-center gap-2 mb-4">

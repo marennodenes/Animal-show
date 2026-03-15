@@ -13,7 +13,7 @@ export default function NewCompetition() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [filter, setFilter] = useState<'upcoming' | 'past'>('upcoming');
+  const [filter, setFilter] = useState<'upcoming' | 'active' | 'past'>('active');
   const userJson = typeof window !== "undefined" ? sessionStorage.getItem("user") : null;
   const user = userJson ? JSON.parse(userJson) : null;
   const isAdmin = user?.is_admin === true;
@@ -24,20 +24,53 @@ export default function NewCompetition() {
       if (result.success) {
         setCompetitions(result.data || []);
       }
+      setLoading(false);
     }
     loadCompetitions();
+  }, []);
+
+  // Reload competitions at midnight when date changes
+  useEffect(() => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+    
+    const timer = setTimeout(() => {
+      // Reload page at midnight to refresh competition status
+      window.location.reload();
+    }, msUntilMidnight);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClick = () => {
     router.push('/create-competition');
   };
 
-  // Filter competitions based on end date
-  const filteredCompetitions = competitions.filter(comp =>
-    filter === 'upcoming'
-      ? new Date(comp.end_date) >= new Date()
-      : new Date(comp.end_date) < new Date()
-  );
+  // Filter competitions based on dates
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+  
+  const filteredCompetitions = competitions.filter(comp => {
+    const startDate = new Date(comp.start_date);
+    const endDate = new Date(comp.end_date);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999); // End of day
+    
+    if (filter === 'upcoming') {
+      // Competitions that haven't started yet
+      return startDate > today;
+    } else if (filter === 'active') {
+      // Competitions where today is between start and end date
+      return startDate <= today && endDate >= today;
+    } else {
+      // Past competitions (end date is before today)
+      return endDate < today;
+    }
+  });
 
 
 return (
@@ -59,10 +92,20 @@ return (
     {/* Filter buttons */}
     <div className="flex gap-4 mb-8">
       <button
+        onClick={() => setFilter('active')}
+        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+          filter === 'active'
+            ? 'bg-emerald-500 text-white shadow-md'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        }`}
+      >
+        Aktive
+      </button>
+      <button
         onClick={() => setFilter('upcoming')}
         className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
           filter === 'upcoming'
-            ? 'bg-[#7EACB5] text-white'
+            ? 'bg-sky-500 text-white shadow-md'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
@@ -72,11 +115,11 @@ return (
         onClick={() => setFilter('past')}
         className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
           filter === 'past'
-            ? 'bg-[#BF4646] text-white'
+            ? 'bg-rose-500 text-white shadow-md'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
-        Tidligere
+        Ferdige
       </button>
     </div>
 
@@ -108,10 +151,12 @@ return (
               <span
                 className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold 
                   ${filter === 'upcoming'
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"}`}
+                    ? "bg-sky-100 text-sky-700"
+                    : filter === 'active'
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-rose-100 text-rose-700"}`}
               >
-                {filter === 'upcoming' ? "Kommende" : "Ferdig"}
+                {filter === 'upcoming' ? "Kommende" : filter === 'active' ? "Aktiv" : "Ferdig"}
               </span>
             </div>
             

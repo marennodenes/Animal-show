@@ -119,7 +119,11 @@ export default function CompetitionDetail({ onAnimalsChange }: { onAnimalsChange
   }
 }, [competition?.id, user?.id, onAnimalsChange]);
 
-const isCompetitionOver = competition && new Date() > new Date(competition.end_date);
+// Check competition status
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const isCompetitionOver = competition && new Date(competition.end_date) < today;
+const isCompetitionActive = competition && new Date(competition.start_date) <= today && new Date(competition.end_date) >= today;
 
   return (
     !competition ? null : (<div>
