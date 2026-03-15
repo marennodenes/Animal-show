@@ -22,21 +22,37 @@ export default function DetailPage() {
     const competitionId = searchParams.get("id") ?? "";
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isCompetitionActive, setIsCompetitionActive] = useState(false);
+    const [isUserParticipating, setIsUserParticipating] = useState(false);
 
     useEffect(() => {
       async function checkCompetitionStatus() {
         if (!competitionId) return;
+        const currentUser = await getCurrentUser();
         const result = await getCompetitionById(competitionId as `${string}-${string}-${string}-${string}-${string}`);
-        if (result.success) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const startDate = new Date(result.data.start_date);
-          const endDate = new Date(result.data.end_date);
-          startDate.setHours(0, 0, 0, 0);
-          endDate.setHours(23, 59, 59, 999);
-          // Competition is active if today is between start and end date
-          setIsCompetitionActive(startDate <= today && endDate >= today);
+
+        if (!result.success) {
+          setIsCompetitionActive(false);
+          setIsUserParticipating(false);
+          return;
         }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startDate = new Date(result.data.start_date);
+        const endDate = new Date(result.data.end_date);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+
+        // Competition is active if today is between start and end date
+        setIsCompetitionActive(startDate <= today && endDate >= today);
+
+        if (!currentUser) {
+          setIsUserParticipating(false);
+          return;
+        }
+
+        const participating = await userInCompetition(currentUser.id, competitionId);
+        setIsUserParticipating(participating);
       }
       checkCompetitionStatus();
     }, [competitionId, refreshTrigger]);
@@ -64,8 +80,8 @@ export default function DetailPage() {
       <Sidebar />
       <main className="flex-1 ml-50 overflow-y-auto p-8">
         <CompetitionDetail onAnimalsChange={() => setRefreshTrigger(prev => prev + 1)} />
-        {/* Only show NewPost button if competition is active */}
-        {isCompetitionActive && (
+        {/* Only show NewPost button if the user is participating in an active competition */}
+        {isCompetitionActive && isUserParticipating && (
           <NewPost 
             defaultCompetitionId={competitionId} 
             onPostCreated={() => setRefreshTrigger(prev => prev + 1)}

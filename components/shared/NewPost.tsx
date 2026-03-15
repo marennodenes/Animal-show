@@ -170,7 +170,7 @@ return (
                   await addAnimalToCompetition(
                     selectedAnimal,
                     selectedCompetition,
-                    selectedAnimalObj?.species, // <-- species må med!
+                    selectedAnimalObj?.species,
                     postContent
                   );
                   setIsOpen(false);
