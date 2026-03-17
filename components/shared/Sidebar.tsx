@@ -38,7 +38,7 @@ export default function Sidebar() {
       
       {/* Home */}
       <button 
-        className="w-full px-5 py-1.5vh] flex items-center justify-center group-hover:justify-start gap-4 rounded-lg hover:bg-white/20 transition-colors"
+        className="w-full px-5 py-[1.5vh] flex items-center justify-center group-hover:justify-start gap-4 rounded-lg hover:bg-white/20 transition-colors"
         aria-label="Hjem"
         onClick={() => router.push('/homepage')}
       >
