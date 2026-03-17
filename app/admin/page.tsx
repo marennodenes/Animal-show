@@ -11,9 +11,23 @@ import CompetitionGraph from '@/components/graph/competitionGraph';
 import { useState, useEffect } from 'react';
 import { getMostPopularUser } from '@/lib/user';
 import User from '@/lib/models/User';
+import { getCurrentUser } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 
 export default function AdminPage() {
+    const router = useRouter();
+
     const [mostPopularUser, setMostPopularUser] = useState<User | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    
+    useEffect(() => {
+        getCurrentUser().then((user) => {
+        setCurrentUser(user);
+        if (!user?.is_admin) {
+            router.push("/homepage");
+        }
+        });
+    }, []);
 
     useEffect(() => {
         getMostPopularUser().then(setMostPopularUser);
