@@ -67,10 +67,10 @@ export default function MyCompetitions() {
   return(
     <div className="flex flex-col items-center w-full px-4 py-8">
       <div className="w-full max-w-3xl">
-      <h1 className="text-3xl font-bold text-center mb-8">Dine aktive konkurranser</h1>
+        <h1 className="text-3xl font-bold text-center mb-8">Dine aktive konkurranser</h1>
         {/* Hvis ingen competitions */}
         {!loading && competitions.length === 0 && (
-        <div className="text-center text-gray-400 my-8">
+          <div className="text-center text-gray-400 my-8">
             Du er ikke påmeldt noen aktive konkurranser.
           </div>
         )}
@@ -78,35 +78,46 @@ export default function MyCompetitions() {
         {competitions.map((comp, i) => (
           <div
             key={i}
-            className="bg-white border border-[#E5E7EB] rounded-2xl p-8 mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl"
+            onClick={() => router.push(`/detailPage?id=${comp.id}`)}
+            className="bg-white border border-[#E5E7EB] rounded-2xl mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
           >
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
-              <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                Aktiv
-              </span>
-            </div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
-                {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+            {/* Competition content */}
+            <div className="p-8">
+              {/* Competition header with name and badge */}
+              <div className="flex items-end gap-3 mb-4">
+                <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
+                {/* Competition dates */}
+                <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
+                  {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
+                </div>
+                {/* Participant count */}
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
+                  <Users size={16} className="text-gray-500" />
+                  <span>{participantCounts[comp.id] || 0} deltakere</span>
+                </div>
+                {/* Status badge */}
+                <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                  Aktiv
+                </span>
               </div>
-              {/* Participant count */}
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
-                <Users size={16} className="text-gray-500" />
-                <span>{participantCounts[comp.id] || 0} deltakere</span>
-              </div>
+              
+              {/* Competition description */}
+              {comp.description && (
+                <div className="text-gray-700 mb-4">{comp.description}</div>
+              )}
             </div>
-            {comp.description && (
-              <div className="mb-4 text-gray-700">{comp.description}</div>
+            
+            {/* Competition Image */}
+            {comp.image_url && (
+              <div className="w-full h-64 bg-gray-200 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={comp.image_url} 
+                  alt={comp.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
-            <div className="mt-auto flex justify-end w-full">
-              <button
-                onClick={() => router.push(`/detailPage?id=${comp.id}`)}
-                className="bg-[#7EACB5] hover:bg-[#6898A5] text-white text-lg font-semibold py-3 px-8 rounded-xl shadow transition-all duration-200 border-2 border-[#7EACB5] hover:scale-105"
-              >
-                Se konkurranse
-              </button>
-            </div>
           </div>
         ))}
       </div>
