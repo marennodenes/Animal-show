@@ -1,12 +1,17 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DropdownInput from "@/components/shared/DropdownInput";
 import { getUserAnimals } from "@/lib/dog";
+import Animal from "@/lib/models/Animals";
+import Competition from "@/lib/models/Competition";
 import { createClient } from "@/utils/supabase/client";
-import { useEffect } from "react";
 import { getCompetitionByUser, addAnimalToCompetition } from "@/lib/competition";
+
+interface CompetitionUserRow {
+  Competition: Competition | null;
+}
 
 /**
  * NewPost component for creating a new post
@@ -24,91 +29,95 @@ export default function NewPost({
   const [selectedAnimal, setSelectedAnimal] = useState("");
   const [selectedCompetition, setSelectedCompetition] = useState("");
   const [postContent, setPostContent] = useState("");
-  const [userAnimals, setUserAnimals] = useState<any[]>([]);
-  const [competitions, setCompetitions] = useState<any[]>([]);
+  const [userAnimals, setUserAnimals] = useState<Animal[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [hasLoadedOptions, setHasLoadedOptions] = useState(false);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const MAX_CHARS = 500;
 
-  // if selected competition changes from outside, update the state
-  // happens when used in competitionDetailPage
   useEffect(() => {
-    if (defaultCompetitionId && isOpen) {
-      setSelectedCompetition(defaultCompetitionId);
+    if (!isOpen || hasLoadedOptions) {
+      return;
     }
-  }, [defaultCompetitionId, isOpen]);
 
-  //Fetch user´s dogs from backend
-  useEffect(() => {
-    const fetchAnimals = async () => {
+    let isActive = true;
+
+    const loadOptions = async () => {
+      setIsLoadingOptions(true);
+
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const animals = await getUserAnimals(user.id);
+
+      if (!user) {
+        if (isActive) {
+          setIsLoadingOptions(false);
+        }
+        return;
+      }
+
+      const [animals, competitionResult] = await Promise.all([
+        getUserAnimals(user.id),
+        getCompetitionByUser(user.id, "active"),
+      ]);
+
+      if (!isActive) {
+        return;
+      }
+
+      const activeCompetitions = competitionResult.success
+        ? ((competitionResult.data ?? []) as CompetitionUserRow[])
+            .map((item) => item.Competition)
+            .filter((competition): competition is Competition => competition !== null)
+        : [];
+
       setUserAnimals(animals);
+      setCompetitions(activeCompetitions);
+      setHasLoadedOptions(true);
+      setIsLoadingOptions(false);
     };
 
-    fetchAnimals();
-  }, []);
+    void loadOptions();
 
-  // Fetch all competitions from backend
-  useEffect(() => {
-    const fetchAnimals = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const animals = await getUserAnimals(user.id);
-    setUserAnimals(animals);
-  };
-
-  const fetchCompetitions = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const result = await getCompetitionByUser(user.id, 'active');
-    if (result.success) {
-      // extract competitions and filter out null
-      const comps = (result.data || [])
-        .map((item: any) => item.Competition)
-        .filter((comp: any) => comp !== null);
-      setCompetitions(comps);
-    }
-  };
-
-  fetchAnimals();
-  fetchCompetitions();
-}, []);
+    return () => {
+      isActive = false;
+    };
+  }, [hasLoadedOptions, isOpen]);
   
-  const animalOptions = userAnimals.map(animal => ({
-  value: animal.id,   
-  label: animal.name,
-}));
+  const animalOptions = userAnimals.map((animal) => ({
+    value: animal.id,
+    label: animal.name,
+  }));
 
-const competitionOptions = competitions.map(comp => ({
-  value: comp.id,
-  label: comp.name,
-}));
-// Find the selected competition object for display
-const selectedCompetitionObj = competitions.find(
-    (comp) => comp.id === selectedCompetition
+  const competitionOptions = competitions.map((competition) => ({
+    value: String(competition.id),
+    label: competition.name,
+  }));
+
+  const selectedCompetitionObj = competitions.find(
+    (competition) => String(competition.id) === selectedCompetition
   );
 
-  const canPublish = selectedAnimal !== "" && selectedCompetition !== "";
+  const canPublish =
+    !isLoadingOptions && selectedAnimal !== "" && selectedCompetition !== "";
 
-return (
+  const openModal = () => {
+    setSelectedCompetition(defaultCompetitionId ?? "");
+    setIsOpen(true);
+  };
+
+  return (
     <>
-      {/* Floating red button to open modal */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={openModal}
         className="fixed bottom-16 right-12 bg-[#BF4646] hover:bg-[#A03A3A] text-white rounded-full p-4 shadow-lg transition-all hover:scale-110"
         aria-label="New post"
       >
         <Plus size={60} />
       </button>
 
-      {/* Modal for creating a new post */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="bg-white border-4 border-[#7EACB5] rounded-lg p-8 w-full max-w-2xl mx-4 relative shadow-xl">
-            {/* Close button */}
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -118,7 +127,6 @@ return (
             </button>
             <h2 className="text-2xl font-bold mb-6">New Post</h2>
             <div className="space-y-4">
-              {/* If defaultCompetitionId is set, show competition as text, else show dropdown */}
               {defaultCompetitionId ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -134,20 +142,18 @@ return (
                   value={selectedCompetition}
                   onChange={setSelectedCompetition}
                   options={competitionOptions}
-                  placeholder="Velg konkurranse"
+                  placeholder={isLoadingOptions ? "Laster konkurranser..." : "Velg konkurranse"}
                 />
               )}
 
-              {/* Dropdown for selecting dog */}
               <DropdownInput
                 label="Legg til kjæledyr"
                 value={selectedAnimal}
                 onChange={setSelectedAnimal}
                 options={animalOptions}
-                placeholder="Velg kjæledyr"
+                placeholder={isLoadingOptions ? "Laster kjæledyr..." : "Velg kjæledyr"}
               />
 
-              {/* Textarea for post content */}
               <div>
                 <textarea
                   value={postContent}
@@ -161,11 +167,11 @@ return (
                 </div>
               </div>
 
-              {/* Publish button */}
               <button
                 onClick={async () => {
-                  // Log animal in competition 
-                  const selectedAnimalObj = userAnimals.find(animal => animal.id === selectedAnimal);
+                  const selectedAnimalObj = userAnimals.find(
+                    (animal) => animal.id === selectedAnimal
+                  );
 
                   await addAnimalToCompetition(
                     selectedAnimal,
@@ -175,7 +181,6 @@ return (
                   );
                   setIsOpen(false);
                   
-                  // Call callback to notify parent that a new post was created
                   if (onPostCreated) {
                     onPostCreated();
                   }

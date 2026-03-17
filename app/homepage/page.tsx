@@ -1,7 +1,6 @@
 'use client';
 
 import Sidebar from '@/components/shared/Sidebar';
-import NewPost from '@/components/shared/NewPost';
 import CopyWright from '@/components/shared/CopyRight';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,7 +9,6 @@ import MyCompetitions from '@/components/HomePage/MyCompetitions';
 import UserSearch from '@/components/Search/UserSearch';
 import { getUserAnimals } from '@/lib/dog';
 import { getCompetitionByUser } from '@/lib/competition';
-import { ArrowRight, CalendarDays, PawPrint, Trophy } from 'lucide-react';
 
 interface HomeSummary {
   userName: string;
@@ -90,26 +88,6 @@ export default function Home() {
     };
   }, [router]);
 
-  const summaryCards = summary
-    ? [
-        {
-          title: 'Aktive konkurranser',
-          value: String(summary.activeCompetitionCount),
-          icon: Trophy,
-        },
-        {
-          title: 'Kjæledyr',
-          value: String(summary.animalCount),
-          icon: PawPrint,
-        },
-        {
-          title: 'Kommer snart',
-          value: String(summary.upcomingCompetitionCount),
-          icon: CalendarDays,
-        },
-      ]
-    : [];
-
   return (
     <div className="fixed inset-0 overflow-hidden bg-[var(--background)]">
       <Sidebar />
@@ -147,8 +125,6 @@ export default function Home() {
               <MyCompetitions />
             </>
           )}
-
-          <NewPost />
         </div>
       </main>
 
