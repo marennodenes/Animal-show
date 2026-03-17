@@ -162,13 +162,13 @@ export default function MyCompetitions() {
               key={String(competition.id)}
               type="button"
               onClick={() => router.push(`/detailPage?id=${competition.id}`)}
-              className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition duration-200 hover:border-[#CFDADF] hover:shadow-md hover:bg-[#FAFBFC]"
+              className="group relative overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#CFDADF] hover:shadow-[0_14px_28px_rgba(34,51,59,0.08)] hover:bg-[#FAFBFC]"
             >
               <div className={competition.image_url ? 'grid gap-0 md:grid-cols-[1.2fr_0.8fr]' : ''}>
                 <div className="p-6">
                   <div className="flex flex-wrap items-start gap-3">
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-xl font-semibold text-[#22333B]">
+                      <h3 className="text-xl font-semibold text-[#22333B] transition-colors duration-200 group-hover:text-[#1A2A31]">
                         {competition.name}
                       </h3>
                       <p className="mt-2 text-sm text-[#5C6970]">
@@ -181,11 +181,11 @@ export default function MyCompetitions() {
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-3 text-sm text-[#5C6970]">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2 transition-colors duration-200 group-hover:bg-white">
                       <Users className="h-4 w-4 text-[#7EACB5]" />
                       {participantCounts[String(competition.id)] ?? 0} deltakere
                     </span>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2 transition-colors duration-200 group-hover:bg-white">
                       <CalendarDays className="h-4 w-4 text-[#7EACB5]" />
                       {getSpeciesLabel(competition.species)}
                     </span>
@@ -204,7 +204,7 @@ export default function MyCompetitions() {
                     <img
                       src={competition.image_url}
                       alt={competition.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                     />
                   </div>
                 )}

@@ -2,7 +2,7 @@
 'use client';
 import { Plus, Users, CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { getAllCompetitions, getParticipantCount } from '@/lib/competition';
 import Competition from '@/lib/models/Competition';
 
@@ -22,6 +22,51 @@ function getSpeciesLabel(species?: string) {
   return 'Alle kjæledyr';
 }
 
+function getDaysUntilStart(startDateString: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startDate = new Date(startDateString);
+  startDate.setHours(0, 0, 0, 0);
+
+  const diffInMs = startDate.getTime() - today.getTime();
+  const diffInDays = Math.max(Math.ceil(diffInMs / (1000 * 60 * 60 * 24)), 0);
+
+  if (diffInDays === 0) {
+    return 'Åpner i dag';
+  }
+
+  if (diffInDays === 1) {
+    return 'Åpner i morgen';
+  }
+
+  return `Åpner om ${diffInDays} dager`;
+}
+
+function subscribeToSessionStorage() {
+  return () => {};
+}
+
+function getAdminSnapshot() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const storedUser = window.sessionStorage.getItem('user');
+
+  if (!storedUser) {
+    return false;
+  }
+
+  try {
+    const parsedUser = JSON.parse(storedUser) as { is_admin?: boolean };
+    return parsedUser.is_admin === true;
+  } catch (error) {
+    console.error('Could not parse user from sessionStorage:', error);
+    return false;
+  }
+}
+
 export default function CompetitionList() {
 
   const router = useRouter();
@@ -29,11 +74,8 @@ export default function CompetitionList() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [participantCounts, setParticipantCounts] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(true);
-
   const [filter, setFilter] = useState<'upcoming' | 'active' | 'past'>('active');
-  const userJson = typeof window !== "undefined" ? sessionStorage.getItem("user") : null;
-  const user = userJson ? JSON.parse(userJson) : null;
-  const isAdmin = user?.is_admin === true;
+  const isAdmin = useSyncExternalStore(subscribeToSessionStorage, getAdminSnapshot, () => false);
 
   useEffect(() => {
     async function loadCompetitions() {
@@ -96,6 +138,22 @@ export default function CompetitionList() {
     return endDate < today;
   });
 
+  const statusBadgeStyles = {
+    active: 'bg-[#D4EDDA] text-[#0F5132]',
+    upcoming: 'bg-[#E6F1F3] text-[#38606A]',
+    past: 'bg-[#FFF0EA] text-[#BF4646]',
+  } as const;
+
+  const filterButtonBase =
+    'rounded-lg px-4 py-2 font-semibold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7EACB5]/35';
+
+  const filterButtonStyles = {
+    active: 'border border-[#B8DEC7] bg-[#D4EDDA] text-[#0F5132] shadow-sm',
+    upcoming: 'border border-[#C8DCE2] bg-[#E6F1F3] text-[#38606A] shadow-sm',
+    past: 'border border-[#F1D2C8] bg-[#FFF0EA] text-[#BF4646] shadow-sm',
+    idle: 'border border-[#D7E1E4] bg-white text-[#536168] shadow-sm hover:border-[#C7D7DC] hover:bg-[#F8FBFB]',
+  } as const;
+
 
 return (
   <div>
@@ -103,10 +161,8 @@ return (
     {isAdmin && (
       <button
         onClick={handleClick}
-        className="group relative mb-8 flex w-full max-w-3xl flex-col gap-4 overflow-hidden rounded-3xl border border-[#D4E3E6] bg-white-to-r from-[#F9FCFC] via-white to-[#F7ECE9] p-6 text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row sm:items-center sm:justify-between"
-
+        className="group relative mb-8 flex w-full max-w-3xl flex-col gap-4 overflow-hidden rounded-3xl border border-[#D4E3E6] bg-white p-6 text-left shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-[#C7D7DC] hover:shadow-xl sm:flex-row sm:items-center sm:justify-between"
       >
-        <div className="absolute inset-y-0 right-0 hidden w-32 bg-[radial-gradient(circle_at_center,_rgba(191,70,70,0.12),_transparent_70%)] sm:block" />
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#7EACB5] text-white shadow-sm transition-transform group-hover:scale-105">
             <Plus size={28} />
@@ -133,30 +189,30 @@ return (
     <div className="flex gap-4 mb-8">
       <button
         onClick={() => setFilter('active')}
-        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+        className={`${filterButtonBase} ${
           filter === 'active'
-            ? 'bg-emerald-500 text-white shadow-md'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? filterButtonStyles.active
+            : filterButtonStyles.idle
         }`}
       >
         Aktive
       </button>
       <button
         onClick={() => setFilter('upcoming')}
-        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+        className={`${filterButtonBase} ${
           filter === 'upcoming'
-            ? 'bg-sky-500 text-white shadow-md'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? filterButtonStyles.upcoming
+            : filterButtonStyles.idle
         }`}
       >
         Kommende
       </button>
       <button
         onClick={() => setFilter('past')}
-        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+        className={`${filterButtonBase} ${
           filter === 'past'
-            ? 'bg-rose-500 text-white shadow-md'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            ? filterButtonStyles.past
+            : filterButtonStyles.idle
         }`}
       >
         Ferdige
@@ -177,13 +233,13 @@ return (
           key={comp.id}
           type="button"
           onClick={() => router.push(`/detailPage?id=${comp.id}`)}
-          className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition duration-200 hover:border-[#CFDADF] hover:shadow-md hover:bg-[#FAFBFC]"
+          className="group relative overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#CFDADF] hover:shadow-[0_14px_28px_rgba(34,51,59,0.08)] hover:bg-[#FAFBFC]"
         >
           <div className={comp.image_url ? 'grid gap-0 md:grid-cols-[1.2fr_0.8fr]' : ''}>
             <div className="p-6">
               <div className="flex flex-wrap items-start gap-3">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xl font-semibold text-[#22333B]">
+                  <h3 className="text-xl font-semibold text-[#22333B] transition-colors duration-200 group-hover:text-[#1A2A31]">
                     {comp.name}
                   </h3>
                   <p className="mt-2 text-sm text-[#5C6970]">
@@ -192,21 +248,27 @@ return (
                 </div>
                 <span className={`rounded-full px-3 py-1 text-xs font-semibold 
                   ${filter === 'upcoming'
-                    ? "bg-sky-100 text-sky-700"
+                    ? statusBadgeStyles.upcoming
                     : filter === 'active'
-                    ? "bg-[#D4EDDA] text-[#0F5132]"
-                    : "bg-rose-100 text-rose-700"}`}
+                    ? statusBadgeStyles.active
+                    : statusBadgeStyles.past}`}
                 >
                   {filter === 'upcoming' ? "Kommende" : filter === 'active' ? "Aktiv" : "Ferdig"}
                 </span>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-3 text-sm text-[#5C6970]">
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                {filter === 'upcoming' && (
+                  <span className="inline-flex items-center gap-2 rounded-full bg-[#E6F1F3] px-3 py-2 font-medium text-[#38606A] transition-colors duration-200 group-hover:bg-[#DDECEF]">
+                    <CalendarDays className="h-4 w-4 text-[#7EACB5]" />
+                    {getDaysUntilStart(comp.start_date)}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2 transition-colors duration-200 group-hover:bg-white">
                   <Users className="h-4 w-4 text-[#7EACB5]" />
                   {participantCounts[comp.id] || 0} deltakere
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2 transition-colors duration-200 group-hover:bg-white">
                   <CalendarDays className="h-4 w-4 text-[#7EACB5]" />
                   {getSpeciesLabel(comp.species)}
                 </span>
@@ -225,7 +287,7 @@ return (
                 <img
                   src={comp.image_url}
                   alt={comp.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                 />
               </div>
             )}
