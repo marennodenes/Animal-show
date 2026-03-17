@@ -17,10 +17,16 @@ interface Comment extends CommentWithUserName {
 interface CommentsPageProps {
     animal_id: string;
     competition_id: string;
+    onCommentCountChange?: (count: number) => void;
     onClose: () => void;
 }
 
-export default function CommentsPage({ animal_id, competition_id, onClose }: CommentsPageProps) {
+export default function CommentsPage({
+    animal_id,
+    competition_id,
+    onCommentCountChange,
+    onClose,
+}: CommentsPageProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
@@ -62,10 +68,11 @@ export default function CommentsPage({ animal_id, competition_id, onClose }: Com
         const loadComments = async () => {
             const fetchedComments = await getComments(animal_id, competition_id);
             setComments(fetchedComments);
+            onCommentCountChange?.(fetchedComments.length);
         };
 
         void loadComments();
-    }, [animal_id, competition_id]);
+    }, [animal_id, competition_id, onCommentCountChange]);
 
     const getDisplayName = (comment: Comment) => {
         if (comment.user_name?.trim()) {
@@ -87,12 +94,17 @@ export default function CommentsPage({ animal_id, competition_id, onClose }: Com
         setNewComment("");
         const fetchedComments = await getComments(animal_id, competition_id);
         setComments(fetchedComments);
+        onCommentCountChange?.(fetchedComments.length);
     };
 
     const handleDeleteComment = async (comment_id: string) => {
         if (!currentUser) return;
         await deleteComment(currentUser.id, comment_id);
-        setComments((prev) => prev.filter((c) => c.id !== comment_id));
+        setComments((prev) => {
+            const updatedComments = prev.filter((c) => c.id !== comment_id);
+            onCommentCountChange?.(updatedComments.length);
+            return updatedComments;
+        });
     };
 
     return (

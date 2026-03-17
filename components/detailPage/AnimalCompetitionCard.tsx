@@ -29,6 +29,8 @@ export default function AnimalCompetitionCard({
   isDeleting = false,
 }: AnimalCompetitionCardProps) {
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [commentCountOverride, setCommentCountOverride] = useState<number | null>(null);
+  const commentCount = commentCountOverride ?? animal.comment_count ?? 0;
 
   return (
     <div className="relative flex flex-col items-center py-4">
@@ -72,7 +74,7 @@ export default function AnimalCompetitionCard({
             aria-label="Se kommentarer"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{animal.comment_count || 0}</span>
+            <span className="text-sm">{commentCount}</span>
           </button>
           {canDelete && (
             <button
@@ -92,6 +94,7 @@ export default function AnimalCompetitionCard({
         <CommentsPage
           animal_id={animal.id}
           competition_id={animal.competition_id}
+          onCommentCountChange={setCommentCountOverride}
           onClose={() => setIsCommentsOpen(false)}
         />
       )}
