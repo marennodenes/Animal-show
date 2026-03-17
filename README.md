@@ -18,8 +18,9 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_PUvJCGDbSDSfJ7gdUuxU
 npm run dev
 ```
 ### Visiting the website
-To use the website go to http://localhost:3000/. 
+To use the website go to http://localhost:3000/
 You can log in with the same admin account as detailed above, or create a new account if you do not want admin features.
+The website is not made for dark mode, so for best possible experience use white mode.
 ## Module Setup
 ### App
 -  The app folder has folders for each page. This is used to import a component and display it as a page.
