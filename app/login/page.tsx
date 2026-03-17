@@ -2,11 +2,12 @@ import LoginForm from '@/components/LogInPage/LogInForm';
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4">
-      <LoginForm />
+    <div className="auth-pattern-bg flex min-h-screen items-center justify-center px-4">
+      <div className="w-full relative z-10">
+        <LoginForm />
+      </div>
     </div>
   );
 }
-
 
 
