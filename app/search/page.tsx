@@ -32,9 +32,9 @@ export default function SearchPage() {
       <main className="flex-1 ml-50 overflow-y-auto p-8">
         {!loading && (
           <UserSearch
-            title="Search"
-            description="Search for other users by username."
-            placeholder="Search by username..."
+            title="Finn andre brukere"
+            description="Søk etter andre brukere ved å skrive inn brukernavn."
+            placeholder="Søk etter brukernavn..."
             limit={12}
           />
         )}
