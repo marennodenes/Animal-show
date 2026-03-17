@@ -63,3 +63,6 @@ The settings page allows the user to change their profile picture, name, bio and
 ### Admin moderating
 Admin accounts have permission to modify and delete content. This includes the ability to delete posts, as well as delete and edit competitions.
 ![moderating](image-9.png)
+## Admin page
+The administrator page shows relevant statistics about the website. This includes users made over time, competitions over time and the most popular account by likes.
+![administrator page](image-12.png)
