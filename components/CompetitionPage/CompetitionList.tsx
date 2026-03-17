@@ -103,7 +103,8 @@ return (
     {isAdmin && (
       <button
         onClick={handleClick}
-        className="group relative mb-8 flex w-full max-w-3xl flex-col gap-4 overflow-hidden rounded-3xl border border-[#D4E3E6] bg-gradient-to-r from-[#F9FCFC] via-white to-[#F7ECE9] p-6 text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row sm:items-center sm:justify-between"
+        className="group relative mb-8 flex w-full max-w-3xl flex-col gap-4 overflow-hidden rounded-3xl border border-[#D4E3E6] bg-white-to-r from-[#F9FCFC] via-white to-[#F7ECE9] p-6 text-left shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row sm:items-center sm:justify-between"
+
       >
         <div className="absolute inset-y-0 right-0 hidden w-32 bg-[radial-gradient(circle_at_center,_rgba(191,70,70,0.12),_transparent_70%)] sm:block" />
         <div className="flex items-center gap-4">
