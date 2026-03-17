@@ -66,10 +66,6 @@ return (
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm font-semibold text-[#BF4646] transition-transform group-hover:translate-x-1">
-          <span>Start her</span>
-          <ArrowRight size={18} />
-        </div>
       </button>
     )}
 
