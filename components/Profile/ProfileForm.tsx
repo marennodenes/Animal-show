@@ -37,6 +37,8 @@ export default function ProfileForm({
   isOwnProfile = true,
 }: ProfileFormProps) {
   const router = useRouter();
+  const error = '';
+  const success = '';
 
   return (
     <div className="max-w-4xl mx-auto">

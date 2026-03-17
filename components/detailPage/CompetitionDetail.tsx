@@ -1,9 +1,8 @@
 
 'use client'
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Users } from "lucide-react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Users, Pencil, Trash2 } from "lucide-react";
 import { AnimalInCompetitionRow, deleteAnimalFromCompetition, deleteCompetition, getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
@@ -46,6 +45,9 @@ export default function CompetitionDetail({
   const [user] = useState<CurrentUser | null>(getStoredUser);
   const [deletingPostKey, setDeletingPostKey] = useState<string | null>(null);
   const [isDeletingCompetition, setIsDeletingCompetition] = useState(false);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isCompetitionOver = competition ? new Date(competition.end_date) < today : false;
 
   // Collect competition ID from URL, f.eks. /detailPage?id=123
   useEffect(() => {
@@ -73,35 +75,17 @@ export default function CompetitionDetail({
     };
     fetchCompetition();
   }, []);
-  useEffect(() => {
-    console.log("Fetched competition:", competition);
-  }, [competition]);
   // Check if user is participating
   useEffect(() => {
-    if (user && competition && competition.id) {
-      userInCompetition(user.id, competition.id).then(result => {
-        setIsParticipating(result);
-      });
-      });
+    if (!user?.id || !competition?.id) {
+      return;
     }
-  }, [user, competition?.id]);
-  // Crown winner when competition is over
-  useEffect(() => {
-    if (!competition || !user?.id) return;
-    if (isCompetitionOver) {
-      crownWinner(competition.id, user.id);
-    }
-  }, [competition?.id, user?.id]);
-  //function for checking who the winner is
-  const crownWinner = async (competitionID: string, userID: string) => {
-    try {
-      const animalsWithLikes = await getAnimalsInCompetition(competitionID, userID);
-      const maxLikes = animalsWithLikes.reduce((max, a) => a.likes > max ? a.likes : max, 0);
-      const winners = animalsWithLikes.filter((a: any) => a.likes === maxLikes);
-      setWinner(winners);
-    } catch (error) {
-    }
-  };
+
+    userInCompetition(user.id, competition.id).then(result => {
+      setIsParticipating(result);
+    });
+  }, [user?.id, competition?.id]);
+
   const handleParticipate = async (competitionID: string) => {
     if (!user || isParticipating) return;
     const result = await participateCompetition({ userID: user.id, competitionID });
@@ -201,24 +185,29 @@ export default function CompetitionDetail({
     }
   }, [competition?.id, user?.id, refreshTrigger]);
 
-// Check competition status
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-const isCompetitionOver = competition && new Date(competition.end_date) < today;
-const isCompetitionActive = competition && new Date(competition.start_date) <= today && new Date(competition.end_date) >= today;
+  const winner = (() => {
+    if (!isCompetitionOver || animals.length === 0) {
+      return [] as AnimalInCompetitionRow[];
+    }
+
+    const maxLikes = animals.reduce(
+      (max, animal) => (animal.likes > max ? animal.likes : max),
+      0,
+    );
+
+    return animals.filter((animal) => animal.likes === maxLikes);
+  })();
+  const winnerNames = winner.map((winnerAnimal) => winnerAnimal.Animal?.name ?? "Ukjent");
+  const winnerLikes = winner[0]?.likes ?? 0;
 
   return (
     !competition ? null : (<div>
-      <div className="flex items-center gap-4 mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="text-3xl font-bold">{competition.name}</h1>
-        {/* Participant count badge */}
         <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 border border-gray-200">
           <Users size={18} className="text-gray-500" />
           <span>{animals.length} deltakere</span>
         </div>
-      </div>
-      <div className="mb-4 flex items-center gap-3">
-        <h1 className="text-3xl font-bold">{competition.name}</h1>
         {user?.is_admin === true && (
           <>
             <button
@@ -276,11 +265,11 @@ const isCompetitionActive = competition && new Date(competition.start_date) <= t
           {winner && winner.length > 0 ? (
             <div className="bg-green-100 text-green-600 font-medium px-4 py-2 rounded">
               {winner.length === 1 ? (
-                <span>Vinner: {winner[0].Animal.name} med {winner[0].likes} likes!</span>
+                <span>Vinner: {winnerNames[0]} med {winnerLikes} likes!</span>
               ) : winner.length === 2 ? (
-                <span>Vinnere: {winner.map((w: any) => w.Animal.name).join(" og ")} med {winner[0].likes} likes!</span>
+                <span>Vinnere: {winnerNames.join(" og ")} med {winnerLikes} likes!</span>
               ) : winner.length > 2 ? (
-                <span> Vinnere: {winner.map((w: any) => w.Animal.name).join(", ")} med {winner[0].likes} likes!</span>
+                <span> Vinnere: {winnerNames.join(", ")} med {winnerLikes} likes!</span>
               ) : null}
             </div>
           ) : (
@@ -320,8 +309,8 @@ const isCompetitionActive = competition && new Date(competition.start_date) <= t
                 liked: animalInCompetition.liked,
                 likes: animalInCompetition.likes,
               }}
-          canDelete={canDeletePost}
-          isDeleting={deletingPostKey === postKey}
+              canDelete={canDeletePost}
+              isDeleting={deletingPostKey === postKey}
               //onlike sends animal_id, competition_id and liked status to handleLike function
               onLike={() =>
                 handleLike(
@@ -330,18 +319,17 @@ const isCompetitionActive = competition && new Date(competition.start_date) <= t
                   animalInCompetition.liked
                 )
               }
-          onDelete={() =>
-              handleDeletePost(
-                animalInCompetition.animal_id,
-                animalInCompetition.competition_id
-              )
-            }
+              onDelete={() =>
+                handleDeletePost(
+                  animalInCompetition.animal_id,
+                  animalInCompetition.competition_id
+                )
+              }
             />
-            );
+          );
         })}
       </div>
     </div>
     )
   );
 }
-
