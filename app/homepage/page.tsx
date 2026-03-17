@@ -130,60 +130,19 @@ export default function Home() {
                 <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#22333B] md:text-4xl">
                   {getGreeting()}, {summary.userName}
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#5C6970] md:text-base">
-                  Her er en enkel oversikt over det viktigste akkurat nå, med søk og aktive
-                  konkurranser rett under.
-                </p>
 
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push('/competitions')}
-                    className="inline-flex items-center gap-2 rounded-full bg-[#22333B] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#17242A]"
-                  >
-                    Se konkurranser
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => router.push('/profile')}
-                    className="rounded-full border border-[#D7E1E4] bg-white px-5 py-3 text-sm font-semibold text-[#22333B] transition hover:border-[#7EACB5]"
-                  >
-                    Gå til profil
-                  </button>
-                </div>
-
-                <div className="mt-6 grid gap-3 md:grid-cols-3">
-                  {summaryCards.map((card) => {
-                    const Icon = card.icon;
-
-                    return (
-                      <article
-                        key={card.title}
-                        className="rounded-2xl bg-[#F8FAFA] px-4 py-4 text-[#22333B]"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="rounded-xl bg-white p-2 text-[#7EACB5] shadow-sm">
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <p className="text-sm font-medium text-[#5C6970]">{card.title}</p>
-                        </div>
-                        <p className="mt-3 text-2xl font-semibold">{card.value}</p>
-                      </article>
-                    );
-                  })}
+                <div className="mt-2 border-t border-[#E3E8EA] pt-8">
+                  <UserSearch
+                    title="Finn andre brukere"
+                    description=""
+                    placeholder="Søk etter brukernavn..."
+                    limit={5}
+                    compact
+                    headingLevel="h2"
+                    noWrapper
+                  />
                 </div>
               </section>
-
-              <UserSearch
-                title="Finn andre brukere"
-                description="Søk etter andre brukere direkte fra hjemmesiden."
-                placeholder="Søk etter brukernavn..."
-                limit={5}
-                compact
-                headingLevel="h2"
-                className="max-w-none mx-0"
-              />
 
               <MyCompetitions />
             </>

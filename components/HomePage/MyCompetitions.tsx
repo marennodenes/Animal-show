@@ -162,7 +162,7 @@ export default function MyCompetitions() {
               key={String(competition.id)}
               type="button"
               onClick={() => router.push(`/detailPage?id=${competition.id}`)}
-              className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition hover:border-[#CFDADF]"
+              className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition duration-200 hover:border-[#CFDADF] hover:shadow-md hover:bg-[#FAFBFC]"
             >
               <div className={competition.image_url ? 'grid gap-0 md:grid-cols-[1.2fr_0.8fr]' : ''}>
                 <div className="p-6">
@@ -175,7 +175,7 @@ export default function MyCompetitions() {
                         {formatDate(competition.start_date)} - {formatDate(competition.end_date)}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#ECF7F9] px-3 py-1 text-xs font-semibold text-[#38606A]">
+                    <span className="rounded-full bg-[#D4EDDA] px-3 py-1 text-xs font-semibold text-[#0F5132]">
                       Aktiv
                     </span>
                   </div>

@@ -1,10 +1,26 @@
 
 'use client';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getAllCompetitions, getParticipantCount } from '@/lib/competition';
-import Competition from '@/lib/models/Competition'; 
+import Competition from '@/lib/models/Competition';
+
+function getSpeciesLabel(species?: string) {
+  if (species === 'dog') {
+    return 'Hund';
+  }
+
+  if (species === 'cat') {
+    return 'Katt';
+  }
+
+  if (species === 'mixed') {
+    return 'Blandet';
+  }
+
+  return 'Alle kjæledyr';
+}
 
 export default function CompetitionList() {
 
@@ -146,7 +162,7 @@ return (
       </button>
     </div>
 
-    <div className="">
+    <div className="flex flex-col gap-4">
       {/* Show message if no competitions */}
       {!loading && filteredCompetitions.length === 0 && (
         <div className="text-center text-gray-400 my-8">
@@ -156,56 +172,64 @@ return (
 
       {/* Competition cards */}
       {filteredCompetitions.map((comp) => (
-        <div
+        <button
           key={comp.id}
+          type="button"
           onClick={() => router.push(`/detailPage?id=${comp.id}`)}
-          className="bg-white border border-[#E5E7EB] rounded-2xl mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
+          className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition duration-200 hover:border-[#CFDADF] hover:shadow-md hover:bg-[#FAFBFC]"
         >
-          {/* Competition content */}
-          <div className="p-8">
-            {/* Competition header with name, date and badge */}
-            <div className="flex items-end gap-3 mb-4">
-              <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
-              {/* Competition dates */}
-              <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
-                {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
-                <Users size={16} className="text-gray-500" />
-                <span>{participantCounts[comp.id] || 0} deltakere</span>
-              </div>
-              {/* Status badge */}
-              <span
-                className={`ml-auto px-3 py-1 rounded-full text-xs font-semibold 
+          <div className={comp.image_url ? 'grid gap-0 md:grid-cols-[1.2fr_0.8fr]' : ''}>
+            <div className="p-6">
+              <div className="flex flex-wrap items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xl font-semibold text-[#22333B]">
+                    {comp.name}
+                  </h3>
+                  <p className="mt-2 text-sm text-[#5C6970]">
+                    {new Date(comp.start_date).toLocaleDateString('nb-NO')} - {new Date(comp.end_date).toLocaleDateString('nb-NO')}
+                  </p>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold 
                   ${filter === 'upcoming'
                     ? "bg-sky-100 text-sky-700"
                     : filter === 'active'
-                    ? "bg-emerald-100 text-emerald-700"
+                    ? "bg-[#D4EDDA] text-[#0F5132]"
                     : "bg-rose-100 text-rose-700"}`}
-              >
-                {filter === 'upcoming' ? "Kommende" : filter === 'active' ? "Aktiv" : "Ferdig"}
-              </span>
+                >
+                  {filter === 'upcoming' ? "Kommende" : filter === 'active' ? "Aktiv" : "Ferdig"}
+                </span>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-3 text-sm text-[#5C6970]">
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                  <Users className="h-4 w-4 text-[#7EACB5]" />
+                  {participantCounts[comp.id] || 0} deltakere
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                  <CalendarDays className="h-4 w-4 text-[#7EACB5]" />
+                  {getSpeciesLabel(comp.species)}
+                </span>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-[#5C6970] md:text-base">
+                {comp.description?.trim()
+                  ? comp.description
+                  : 'Ingen beskrivelse er lagt til for denne konkurransen ennå.'}
+              </p>
             </div>
-            
-            {/* Competition description */}
-            {comp.description && (
-              <div className="text-gray-700 mb-4">{comp.description}</div>
+
+            {comp.image_url && (
+              <div className="h-52 md:h-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={comp.image_url}
+                  alt={comp.name}
+                  className="h-full w-full object-cover"
+                />
+              </div>
             )}
           </div>
-          
-          {/* Competition Image */}
-          {comp.image_url && (
-            <div className="w-full h-64 bg-gray-200 overflow-hidden">
-              {/* Competition images come from storage URLs, so a regular img keeps this simple. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={comp.image_url} 
-                alt={comp.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-        </div>
+        </button>
       ))}
     </div>
   </div>
