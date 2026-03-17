@@ -2,7 +2,7 @@
 
 import Sidebar from '@/components/shared/Sidebar';
 import CopyWright from '@/components/shared/CopyRight';
-import CreateCompetitionForm from '@/components/CreateCompetitionPage/CreateCompetitionForm';
+import CreateCompetitionForm from '@/components/CompetitionPage/CreateCompetitionForm';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isLoggedIn } from '@/lib/auth';
@@ -15,18 +15,14 @@ import { isLoggedIn } from '@/lib/auth';
  */
 export default function CreateCompetition() {
   const router = useRouter();
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
       const user = sessionStorage.getItem("user");
 
       if (user && await isLoggedIn() === true) {
-        setUserEmail(JSON.parse(user).email || '');
-        setUserName(JSON.parse(user).user_metadata?.name || JSON.parse(user).email?.split('@')[0] || '');
-        setLoading(false);
+        setUserId(JSON.parse(user).id || '');
       } else {
         // Not logged in, redirect to login
         router.push('/login');
@@ -40,7 +36,7 @@ export default function CreateCompetition() {
     <div className="fixed inset-0 flex bg-[#f5f2ef]">
       <Sidebar />
       <main className="flex-1 ml-50 overflow-y-auto p-8">
-        <CreateCompetitionForm userID={''} />
+        <CreateCompetitionForm userID={userId} />
       </main>
       <CopyWright />
     </div>
