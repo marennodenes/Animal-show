@@ -37,7 +37,7 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
   const [selectedPet, setSelectedPet] = useState<AnimalType>('dog'); // Default to 'dog'
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedPet(event.target.value as AnimalType);
+    setSelectedPet(event.target.value as AnimalType | '');
   };
 
 
@@ -75,6 +75,13 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
                 return;
             }
         }
+    
+      //Check if pet type is selected
+      if (!selectedPet) {
+        setError('Vennligst velg en konkurranse type');
+        setLoading(false);
+        return;
+      }
 
     try {
       console.log('Opprett konkurranse:', { name, description, startDate, endDate, selectedPet, imageUrl });
@@ -137,6 +144,7 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
             onChange={handleChange}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
+            <option value="">Velg type</option>
             <option value="dog">Hund</option>
             <option value="cat">Katt</option>
             <option value="mixed">Blandet</option>
