@@ -8,8 +8,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import ErrorMessage from '@/components/shared/ErrorMessage';
+import SuccessMessage from '@/components/shared/SuccessMessage';
 import AnimalList from './AnimalList';
-import { UserPen } from 'lucide-react';
+import { User } from 'lucide-react';
 
 
 
@@ -38,31 +40,34 @@ export default function ProfileForm({
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Profil</h1>
+      <ErrorMessage message={error} />
+      <SuccessMessage message={success} />
 
-      <div className="bg-white rounded-lg shadow-md p-6 space-y-4 flex justify-center items-center mb-6">
-        <div className="relative w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+      {/* Clean profile header - no box */}
+      <div className="flex flex-col items-center text-center mb-6 mt-2">
+        {/* Profile picture */}
+        <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[#7EACB5] to-[#6898A5] flex items-center justify-center overflow-hidden mb-4 shadow-md">
           {imageUrl ? (
             // Profile pictures use storage URLs, so a regular img keeps this simple.
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
-              alt={`${userName} profile picture`}
+              alt={userName}
               className="w-full h-full object-cover"
             />
           ) : (
-            <UserPen className="w-16 h-16 text-gray-400" />
+            <User className="w-20 h-20 text-white" strokeWidth={1.5} />
           )}
         </div>
-      </div>
 
-      {/* Name and bio */}
-      <div className="text-center mb-6" >
-        <h2 className="text-2xl font-bold text-gray-800">
+        {/* Name */}
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">
           {userName}
-        </h2>
+        </h1>
+        
+        {/* Bio */}
         {userBio && (
-          <p className="text-gray-600 mt-2 whitespace-pre-wrap mb-6">
+          <p className="text-gray-600 text-base max-w-2xl whitespace-pre-wrap leading-relaxed">
             {userBio}
           </p>
         )}

@@ -6,8 +6,7 @@ import DropdownInput from "@/components/shared/DropdownInput";
 import { getUserAnimals } from "@/lib/dog";
 import { createClient } from "@/utils/supabase/client";
 import { useEffect } from "react";
-import { getUserActiveCompetitions } from "@/lib/competition";
-import { addAnimalToCompetition } from "@/lib/competition";
+import { getCompetitionByUser, addAnimalToCompetition } from "@/lib/competition";
 
 /**
  * NewPost component for creating a new post
@@ -64,8 +63,14 @@ export default function NewPost({
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const userCompetitions = await getUserActiveCompetitions(user.id);
-    setCompetitions(userCompetitions);
+    const result = await getCompetitionByUser(user.id, 'active');
+    if (result.success) {
+      // extract competitions and filter out null
+      const comps = (result.data || [])
+        .map((item: any) => item.Competition)
+        .filter((comp: any) => comp !== null);
+      setCompetitions(comps);
+    }
   };
 
   fetchAnimals();
@@ -165,7 +170,7 @@ return (
                   await addAnimalToCompetition(
                     selectedAnimal,
                     selectedCompetition,
-                    selectedAnimalObj?.species, // <-- species må med!
+                    selectedAnimalObj?.species,
                     postContent
                   );
                   setIsOpen(false);

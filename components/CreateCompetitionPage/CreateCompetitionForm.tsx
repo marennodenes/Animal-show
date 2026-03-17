@@ -32,11 +32,9 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
   type AnimalType = 'dog' | 'cat' | 'mixed';
-  const [selectedPet, setSelectedPet] = useState<AnimalType | ''>('');
+  const [selectedPet, setSelectedPet] = useState<AnimalType>('dog'); // Default to 'dog'
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPet(event.target.value as AnimalType);
@@ -48,14 +46,21 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
     setError('');
     setLoading(true);
 
+    // Validate dates - create today inside function to avoid hydration issues
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     // Validate dates
     if (new Date(startDate) > new Date(endDate)) {
       setError('Sluttdato må være etter startdato');
       setLoading(false);
       return;
     }
-    if (new Date(startDate) < today) {
-      setError('Startdato kan ikke være fortid');
+    // Allow future start dates for upcoming competitions
+    const startDateObj = new Date(startDate);
+    startDateObj.setHours(0, 0, 0, 0);
+    if (startDateObj < today) {
+      setError('Startdato kan ikke være i fortiden');
       setLoading(false);
       return;
     }
@@ -72,14 +77,28 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
         }
 
     try {
-
-      console.log('Opprett konkurranse:', { name, description, startDate, endDate, imageUrl });
+      console.log('Opprett konkurranse:', { name, description, startDate, endDate, selectedPet, imageUrl });
       //call to database
-      await createCompetition({ name, start_date: startDate, end_date: endDate, description, species: selectedPet, image_url: imageUrl });
-      console.log('Konkurranse opprettet:', { name, description, startDate, endDate, imageUrl });
+      const result = await createCompetition({ 
+        name, 
+        start_date: startDate, 
+        end_date: endDate, 
+        description, 
+        species: selectedPet, 
+        image_url: imageUrl 
+      });
+      
+      if (!result.success) {
+        setError(result.error || 'Kunne ikke opprette konkurranse');
+        setLoading(false);
+        return;
+      }
+      
+      console.log('Konkurranse opprettet:', result.data);
       // Navigate back to competitions page
       router.push('/competitions');
     } catch (err) {
+      console.error('Error creating competition:', err);
       setError('Noe gikk galt. Prøv igjen.');
       setLoading(false);
     }

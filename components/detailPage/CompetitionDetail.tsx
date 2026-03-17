@@ -2,6 +2,7 @@
 'use client'
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Users } from "lucide-react";
 import { getAnimalsInCompetition, getCompetitionById, participateCompetition, userInCompetition } from "@/lib/competition";
 import Competition from "@/lib/models/Competition";
 import AnimalCompetitionCard from "./AnimalCompetitionCard";
@@ -118,15 +119,29 @@ export default function CompetitionDetail({ onAnimalsChange }: { onAnimalsChange
   }
   // Get animals with likes aswell
   useEffect(() => {
-    if (competition && competition.id && user && user.id) {
-      getAnimalsInCompetition(competition.id, user.id).then((animals) => {
-        setAnimals(animals);
-      });
-    }
-  }, [competition?.id, user?.id, onAnimalsChange]);
+  if (competition && competition.id && user && user.id) {
+    getAnimalsInCompetition(competition.id, user.id).then((animals) => {
+      setAnimals(animals);
+    });
+  }
+}, [competition?.id, user?.id, onAnimalsChange]);
+
+// Check competition status
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const isCompetitionOver = competition && new Date(competition.end_date) < today;
+const isCompetitionActive = competition && new Date(competition.start_date) <= today && new Date(competition.end_date) >= today;
+
   return (
     !competition ? null : (<div>
-      <h1 className="text-3xl font-bold mb-4">{competition.name}</h1>
+      <div className="flex items-center gap-4 mb-4">
+        <h1 className="text-3xl font-bold">{competition.name}</h1>
+        {/* Participant count badge */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 border border-gray-200">
+          <Users size={18} className="text-gray-500" />
+          <span>{animals.length} deltakere</span>
+        </div>
+      </div>
       <p>
         <strong>Periode:</strong>{" "}
         {new Date(competition.start_date).toLocaleDateString("nb-NO", {
