@@ -22,10 +22,10 @@ export default function AdminPage() {
     
     useEffect(() => {
         getCurrentUser().then((user) => {
-        setCurrentUser(user);
-        if (!user?.is_admin) {
-            router.push("/homepage");
-        }
+            setCurrentUser(user);
+            if (!user?.is_admin) {
+                router.push("/homepage");
+            }
         });
     }, []);
 
@@ -50,7 +50,7 @@ export default function AdminPage() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-xl font-bold mb-1 text-gray-800">Mest populære bruker</h2>
                     <p className="text-sm text-gray-400 mb-4">(Denne brukeren har flest likes totalt)</p>
-                    {mostPopularUser ? (
+                    {mostPopularUser?.name ? (
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-[#7EACB5] flex items-center justify-center text-white font-bold text-lg shrink-0">
                                 {mostPopularUser.name.charAt(0).toUpperCase()}
