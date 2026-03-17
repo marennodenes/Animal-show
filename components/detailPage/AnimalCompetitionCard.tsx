@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 
 interface AnimalCompetitionCardProps {
   animal: {
@@ -9,11 +9,14 @@ interface AnimalCompetitionCardProps {
     likes?: number;
     liked?: boolean;
     text?: string;
+    comments?: string;
   };
   onLike?: () => void;
+  onComment?: () => void;
+
 }
 
-export default function AnimalCompetitionCard({ animal, onLike }: AnimalCompetitionCardProps) {
+export default function AnimalCompetitionCard({ animal, onLike, onComment }: AnimalCompetitionCardProps) {
   return (
     <div className="flex flex-col items-center py-4">
       <div className="w-full h-65 bg-gray-100 flex items-center justify-center overflow-hidden mb-3">
@@ -33,19 +36,29 @@ export default function AnimalCompetitionCard({ animal, onLike }: AnimalCompetit
         {animal.text && (
           <div className="text-gray-700 text-xs italic mb-2">{animal.text}</div>
         )}
-        <button
-          className="mt-1 flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
-          aria-label="Lik dette dyret"
-          onClick={onLike}
-          type="button"
-        >
-          <Heart
-            fill={animal.liked ? "#ef4444" : "none"}
-            color={animal.liked ? "#ef4444" : "currentColor"}
-            className="w-5 h-5"
-          />
-          <span className="text-sm">{animal.likes || 0}</span>
-        </button>
+
+        <div className="mt-1 flex items-center gap-3">
+          <button
+            className="flex items-center gap-1 text-gray-400 hover:text-red-500 transition"
+            aria-label="Lik dette dyret"
+            onClick={onLike}
+            type="button"
+          >
+            <Heart
+              fill={animal.liked ? "#ef4444" : "none"}
+              color={animal.liked ? "#ef4444" : "currentColor"}
+              className="w-5 h-5"
+            />
+            <span className="text-sm">{animal.likes || 0}</span>
+          </button>
+          <button
+            className="flex items-center gap-1 text-gray-400 hover:text-gray-500 transition"
+            onClick={onComment}
+            type="button">
+            <MessageCircle/>
+            <span className="text-sm">{animal.comments || 0}</span>
+          </button>
+        </div>
       </div>
     </div>
   );
