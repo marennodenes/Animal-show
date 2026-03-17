@@ -15,24 +15,25 @@ import Animal from '@/lib/models/Animals';
 
 interface AnimalListProps {
   userId: string;
+  allowDelete?: boolean;
 }
 
-export default function AnimalList({ userId }: AnimalListProps) {
+export default function AnimalList({ userId, allowDelete = true }: AnimalListProps) {
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   // Fetch animals on component mount
   useEffect(() => {
+    const fetchAnimals = async () => {
+      setLoading(true);
+      const data = await getUserAnimals(userId);
+      setAnimals(data);
+      setLoading(false);
+    };
+
     fetchAnimals();
   }, [userId]);
-
-  const fetchAnimals = async () => {
-    setLoading(true);
-    const data = await getUserAnimals(userId);
-    setAnimals(data);
-    setLoading(false);
-  };
 
   // Handle animal deletion
   const handleDelete = async (animalId: string) => {
@@ -73,7 +74,7 @@ export default function AnimalList({ userId }: AnimalListProps) {
             <AnimalCard 
               key={animal.id} 
               animal={animal} 
-              onDelete={handleDelete}
+              onDelete={allowDelete ? handleDelete : undefined}
             />
           ))}
         </div>

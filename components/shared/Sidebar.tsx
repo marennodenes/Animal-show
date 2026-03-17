@@ -1,12 +1,12 @@
 'use client';
 
-import { Home, User, Trophy, Bell, Settings } from 'lucide-react';
+import { Home, User, Trophy, Search, Settings } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 /**
  * Sidebar component for the homepage
- * Contains navigation buttons for Home, Profile, Competitions, and Notifications
+ * Contains navigation buttons for Home, Profile, Competitions, and search
  * Expands on hover to show labels
  * @author marennod
  * @author noravsk
@@ -64,15 +64,15 @@ export default function Sidebar() {
         </span>
       </button>
 
-      {/* Notifications */}
+      {/* Search */}
       <button 
         className="w-full px-5 py-3 flex items-center justify-center group-hover:justify-start gap-4 rounded-lg hover:bg-white/20 transition-colors"
-        aria-label="Varslinger"
-        onClick={() => router.push('/notifications')}
+        aria-label="Søk"
+        onClick={() => router.push('/search')}
       >
-        <Bell className="w-10 h-10 text-white flex-shrink-0" />
+        <Search className="w-10 h-10 text-white flex-shrink-0" />
         <span className="text-white text-lg font-medium hidden group-hover:block transition-opacity duration-200 whitespace-nowrap">
-          Varslinger
+          Søk
         </span>
       </button>
 

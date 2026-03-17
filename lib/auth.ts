@@ -37,7 +37,7 @@ export async function login({ email, password }: { email: string; password: stri
     return {success: false, error: "Fetching the user from the database wen't wrong"}
   }
 
-  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin,authUser.email ?? '', publicUser.bio);
+  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin, authUser.email ?? '', publicUser.bio);
   return {success: true, user: user}
 }
 
@@ -83,7 +83,7 @@ export async function register({ email, password}: { email: string; password: st
   if (userError) {return {success: false, error: "Fetching the user from the database wen't wrong"}} //If this fails there may exist an object in supabase.auth but not the User-wrapper
 
   //Return sucess with User-wrapper-data
-  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin,authUser.email ?? '', publicUser.bio);
+  const user = new User(publicUser.id, publicUser.name, publicUser.created_at, publicUser.is_admin, authUser.email ?? '', publicUser.bio);
   return {success: true, user: user}
 }
 

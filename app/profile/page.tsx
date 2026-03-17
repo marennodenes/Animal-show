@@ -18,7 +18,6 @@ import User from '@/lib/models/User';
 export default function ProfilePage() {
   const router = useRouter();
   const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
   const [userBio, setUserBio] = useState('');
   const [loading, setLoading] = useState(true);
   const [userID, setUserID] = useState('');
@@ -30,7 +29,6 @@ export default function ProfilePage() {
     const supabase = createClient();
 
     if (user && await isLoggedIn() === true) {
-      setUserEmail(user.email || '');
       setUserName(user.name || user.email?.split('@')[0] || '');
       setUserID(user.id);
       setLoading(false);
@@ -83,7 +81,6 @@ export default function ProfilePage() {
       <main className="flex-1 p-8 ml-50 overflow-y-auto">
         <ProfileForm 
           userName={userName}
-          userEmail={userEmail}
           userBio={userBio}
           userID={userID}
           imageUrl={imageUrl}

@@ -11,9 +11,9 @@ export default class User {
     is_admin: boolean;
     email: string;
     bio: string;
-    image_url: string;
+    image_url?: string;
 
-    constructor(id: UUID, name: string, created_at: string, is_admin: boolean, email: string, bio: string, image_url: string) {
+    constructor(id: UUID, name: string, created_at: string, is_admin: boolean, email: string, bio: string, image_url?: string) {
         this.id = id;
         this.name = name;
         this.created_at = created_at;
