@@ -7,6 +7,7 @@
 import Sidebar from '@/components/shared/Sidebar';
 import CopyWright from '@/components/shared/CopyRight';
 import UserGraph from '@/components/graph/userGraph';
+import CompetitionGraph from '@/components/graph/competitionGraph';
 import { useState, useEffect } from 'react';
 import { getMostPopularUser } from '@/lib/user';
 import User from '@/lib/models/User';
@@ -26,6 +27,10 @@ export default function AdminPage() {
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                     <UserGraph/>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <CompetitionGraph/>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
