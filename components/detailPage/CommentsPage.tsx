@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { getComments, addComment, deleteComment } from "@/lib/comments";
+'use client'
 
-interface Comment {
+import { FormEvent, useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { getComments, addComment, deleteComment, CommentWithUserName } from "@/lib/comments";
+import { createClient } from "@/utils/supabase/client";
+
+interface CurrentUser {
     id: string;
+    name?: string | null;
+}
+
+interface Comment extends CommentWithUserName {
     comment: string;
-    user_id: string;
-    User: { name: string };
 }
 
 interface CommentsPageProps {
@@ -18,34 +23,76 @@ interface CommentsPageProps {
 export default function CommentsPage({ animal_id, competition_id, onClose }: CommentsPageProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState("");
-    const [currentUser, setCurrentUser] = useState<{ id: string; name: string } | null>(null);
+    const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
     useEffect(() => {
-        const user = sessionStorage.getItem("user");
-        if (user) setCurrentUser(JSON.parse(user));
+        const loadCurrentUser = async () => {
+            const storedUser = sessionStorage.getItem("user");
+            if (!storedUser) {
+                return;
+            }
+
+            const parsedUser = JSON.parse(storedUser) as CurrentUser;
+
+            if (parsedUser.name?.trim()) {
+                setCurrentUser(parsedUser);
+                return;
+            }
+
+            const supabase = createClient();
+            const { data } = await supabase
+                .from("User")
+                .select("id, name")
+                .eq("id", parsedUser.id)
+                .single();
+
+            const refreshedUser = {
+                ...parsedUser,
+                name: data?.name ?? parsedUser.name ?? "",
+            };
+
+            sessionStorage.setItem("user", JSON.stringify(refreshedUser));
+            setCurrentUser(refreshedUser);
+        };
+
+        void loadCurrentUser();
     }, []);
 
     useEffect(() => {
-        getComments(animal_id, competition_id).then(setComments);
+        const loadComments = async () => {
+            const fetchedComments = await getComments(animal_id, competition_id);
+            setComments(fetchedComments);
+        };
+
+        void loadComments();
     }, [animal_id, competition_id]);
 
-    const handleAddComment = async (e: React.SubmitEvent) => {
+    const getDisplayName = (comment: Comment) => {
+        if (comment.user_name?.trim()) {
+            return comment.user_name;
+        }
+
+        if (comment.user_id === currentUser?.id && currentUser.name?.trim()) {
+            return currentUser.name;
+        }
+
+        return "Ukjent bruker";
+    };
+
+    const handleAddComment = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!currentUser || !newComment.trim()) return;
 
         await addComment(currentUser.id, animal_id, competition_id, newComment);
-        //load comments again after a comment is posted.
-        setComments((prev) => [
-            ...prev,
-            { id: Date.now().toString(), comment: newComment, user_id: currentUser.id, User: { name: currentUser.name } },
-        ]);
         setNewComment("");
+        const fetchedComments = await getComments(animal_id, competition_id);
+        setComments(fetchedComments);
     };
 
     const handleDeleteComment = async (comment_id: string) => {
         if (!currentUser) return;
-        setComments((prev) => prev.filter((c) => c.id !== comment_id));
         await deleteComment(currentUser.id, comment_id);
+        setComments((prev) => prev.filter((c) => c.id !== comment_id));
     };
 
     return (
@@ -64,7 +111,7 @@ export default function CommentsPage({ animal_id, competition_id, onClose }: Com
                     <ul className="space-y-2 mb-4 max-h-60 overflow-auto">
                         {comments.map((c) => (
                             <li key={c.id} className="flex justify-between items-center text-sm text-gray-700">
-                                <span><strong>{c.User?.name ?? ""}</strong>: {c.comment}</span>
+                                <span><strong>{getDisplayName(c)}</strong>: {c.comment}</span>
                                 {c.user_id === currentUser?.id && (
                                     <button onClick={() => handleDeleteComment(c.id)} className="text-red-400 hover:text-red-600 text-xs ml-2">
                                         Slett

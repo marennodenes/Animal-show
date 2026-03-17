@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ErrorMessage from '@/components/shared/ErrorMessage';
@@ -88,9 +88,21 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
       }
 
       setSuccess('Endringene ble lagret');
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        sessionStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...parsedUser,
+            name,
+            bio,
+          }),
+        );
+      }
       router.refresh();
-    } catch (err) {
-      console.error('Error updating settings:', err);
+    } catch (error) {
+      console.error('Error updating settings:', error);
       setError('Noe gikk galt');
     } finally {
       setSaving(false);
@@ -121,7 +133,7 @@ export default function SettingsForm({ userEmail, userId, initialName, initialBi
     await updateProfilePicture(userId, imageUrl);
     setSuccess('Profilbilde oppdatert!');
   } 
-  catch (err) {
+  catch {
     setError('Noe gikk galt. Prøv igjen.');
   } 
   finally {

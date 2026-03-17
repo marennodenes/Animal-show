@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 import { UUID } from "crypto";
 import { getLikes, hasLiked } from "./likes";
+import { getCommentCount } from "./comments";
 import Animal from "./models/Animals";
 
 /**
@@ -24,6 +25,7 @@ export interface AnimalInCompetitionRow {
   text?: string | null;
   likes: number;
   liked: boolean;
+  comment_count?: number;
   Animal: Animal | null;
 }
 
@@ -321,10 +323,11 @@ export async function getAnimalsInCompetition(competitionID: string, userID: str
       try {
         const likes = await getLikes(animal.animal_id, animal.competition_id);
         const liked = await hasLiked(userID, animal.animal_id, animal.competition_id);
-        return { ...animal, likes, liked };
+        const comment_count = await getCommentCount(animal.animal_id, animal.competition_id);
+        return { ...animal, likes, liked, comment_count };
       } catch (error) {
         console.error("Error fetching likes for animal:", animal.animal_id, error);
-        return { ...animal, likes: 0, liked: false };
+        return { ...animal, likes: 0, liked: false, comment_count: 0 };
       }
     })
   );
