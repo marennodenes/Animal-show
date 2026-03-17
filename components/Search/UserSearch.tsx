@@ -11,6 +11,8 @@ interface UserSearchProps {
   placeholder?: string;
   limit?: number;
   compact?: boolean;
+  headingLevel?: 'h1' | 'h2';
+  className?: string;
 }
 
 export default function UserSearch({
@@ -19,7 +21,10 @@ export default function UserSearch({
   placeholder = 'Søk etter brukernavn...',
   limit = 8,
   compact = false,
+  headingLevel = 'h1',
+  className = '',
 }: UserSearchProps) {
+  const HeadingTag = headingLevel;
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchUserResult[]>([]);
@@ -84,15 +89,15 @@ export default function UserSearch({
     };
   }, [query, currentUserId, limit]);
 
-  const hasQuery = query.trim().length > 0;
-
   return (
-    <section className={`w-full ${compact ? 'max-w-3xl mx-auto' : 'max-w-4xl mx-auto'}`}>
+    <section
+      className={`w-full ${compact ? 'max-w-3xl mx-auto' : 'max-w-4xl mx-auto'} ${className}`}
+    >
       <div className={`rounded-[28px] border border-[#D9E3E6] bg-white shadow-sm ${compact ? 'p-5 md:p-6' : 'p-6 md:p-8'}`}>
         <div className="mb-5">
-          <h1 className={`${compact ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900`}>
+          <HeadingTag className={`${compact ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900`}>
             {title}
-          </h1>
+          </HeadingTag>
           <p className="mt-2 text-sm md:text-base text-gray-600">
             {description}
           </p>

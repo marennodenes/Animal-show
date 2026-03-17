@@ -1,127 +1,218 @@
 'use client';
-import { Users } from 'lucide-react';
+
+import { CalendarDays, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getCompetitionByUser, getParticipantCount } from '@/lib/competition';
 import Competition from '@/lib/models/Competition';
+
+interface CompetitionUserRow {
+  Competition: Competition | null;
+}
+
+function formatDate(dateString: string) {
+  return new Intl.DateTimeFormat('nb-NO', {
+    day: 'numeric',
+    month: 'short',
+  }).format(new Date(dateString));
+}
+
+function getSpeciesLabel(species?: string) {
+  if (species === 'dog') {
+    return 'Hund';
+  }
+
+  if (species === 'cat') {
+    return 'Katt';
+  }
+
+  if (species === 'mixed') {
+    return 'Blandet';
+  }
+
+  return 'Alle kjaledyr';
+}
+
 export default function MyCompetitions() {
   const router = useRouter();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [participantCounts, setParticipantCounts] = useState<{ [key: string]: number }>({});
+  const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
-  const userJson = typeof window !== "undefined" ? sessionStorage.getItem("user") : null;
-  const user = userJson ? JSON.parse(userJson) : null;
-
-  /**
-   * Loads only upcoming competitions for the user, and only competitions that they are assigned to.
-   */
   useEffect(() => {
-    async function loadCompetitions() {
-      const result = await getCompetitionByUser(user.id);
-      if (result.success) {
-        const comps = (result.data || []).map((item: any) => item.Competition);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const active = comps.filter((comp) => {
-          const startDate = new Date(comp.start_date);
-          const endDate = new Date(comp.end_date);
-          startDate.setHours(0, 0, 0, 0);
-          endDate.setHours(23, 59, 59, 999);
-          return startDate <= today && endDate >= today;
-        });
-        setCompetitions(active);
-        
-        // Load participant counts
-        const counts: { [key: string]: number } = {};
-        await Promise.all(
-          active.map(async (comp) => {
-            const count = await getParticipantCount(comp.id);
-            counts[comp.id] = count;
-          })
-        );
-        setParticipantCounts(counts);
+    let isActive = true;
+
+    const loadCompetitions = async () => {
+      if (typeof window === 'undefined') {
+        return;
       }
+
+      const storedUser = sessionStorage.getItem('user');
+
+      if (!storedUser) {
+        setLoading(false);
+        return;
+      }
+
+      let userId: string | undefined;
+
+      try {
+        const parsedUser = JSON.parse(storedUser) as { id?: string };
+        userId = parsedUser.id;
+      } catch (error) {
+        console.error('Could not read user from session storage:', error);
+      }
+
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      const result = await getCompetitionByUser(userId, 'active');
+
+      if (!isActive) {
+        return;
+      }
+
+      if (!result.success) {
+        setLoading(false);
+        return;
+      }
+
+      const activeCompetitions = ((result.data ?? []) as CompetitionUserRow[])
+        .map((item) => item.Competition)
+        .filter((competition): competition is Competition => competition !== null);
+
+      setCompetitions(activeCompetitions);
+
+      const participantEntries = await Promise.all(
+        activeCompetitions.map(async (competition) => {
+          const participantCount = await getParticipantCount(String(competition.id));
+          return [String(competition.id), participantCount] as const;
+        })
+      );
+
+      if (!isActive) {
+        return;
+      }
+
+      setParticipantCounts(Object.fromEntries(participantEntries));
       setLoading(false);
-    }
-    loadCompetitions();
+    };
+
+    void loadCompetitions();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
-  // Reload competitions at midnight when date changes
   useEffect(() => {
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
-    
+
     const msUntilMidnight = tomorrow.getTime() - now.getTime();
-    
-    const timer = setTimeout(() => {
-      // Reload page at midnight to refresh competition status
+
+    const timer = window.setTimeout(() => {
       window.location.reload();
     }, msUntilMidnight);
-    
-    return () => clearTimeout(timer);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, []);
 
-  return(
-    <div className="flex flex-col items-center w-full px-4 py-8">
-      <div className="w-full max-w-3xl">
-        <h1 className="text-3xl font-bold text-center mb-8">Dine aktive konkurranser</h1>
-        {/* Hvis ingen competitions */}
-        {!loading && competitions.length === 0 && (
-          <div className="text-center text-gray-400 my-8">
-            Du er ikke påmeldt noen aktive konkurranser.
-          </div>
-        )}
-        {/* Display competition cards  */}
-        {competitions.map((comp, i) => (
-          <div
-            key={i}
-            onClick={() => router.push(`/detailPage?id=${comp.id}`)}
-            className="bg-white border border-[#E5E7EB] rounded-2xl mb-8 shadow-lg flex flex-col w-full max-w-3xl transition-transform hover:scale-[1.02] hover:shadow-2xl cursor-pointer overflow-hidden"
-          >
-            {/* Competition content */}
-            <div className="p-8">
-              {/* Competition header with name and badge */}
-              <div className="flex items-end gap-3 mb-4">
-                <h2 className="text-2xl font-bold text-[#BF4646]">{comp.name}</h2>
-                {/* Competition dates */}
-                <div className="px-3 py-1 rounded text-sm font-medium text-gray-600">
-                  {new Date(comp.start_date).toLocaleDateString()} - {new Date(comp.end_date).toLocaleDateString()}
-                </div>
-                {/* Participant count */}
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-gray-50 rounded-lg text-sm font-medium text-gray-700">
-                  <Users size={16} className="text-gray-500" />
-                  <span>{participantCounts[comp.id] || 0} deltakere</span>
-                </div>
-                {/* Status badge */}
-                <span className="ml-auto px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
-                  Aktiv
-                </span>
-              </div>
-              
-              {/* Competition description */}
-              {comp.description && (
-                <div className="text-gray-700 mb-4">{comp.description}</div>
-              )}
-            </div>
-            
-            {/* Competition Image */}
-            {comp.image_url && (
-              <div className="w-full h-64 bg-gray-200 overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img 
-                  src={comp.image_url} 
-                  alt={comp.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-          </div>
-        ))}
+  return (
+    <section className="w-full">
+      <div className="mb-4">
+        <h2 className="text-2xl font-semibold text-[#22333B]">Dine aktive konkurranser</h2>
+        <p className="mt-2 text-sm text-[#5C6970] md:text-base">
+          Trykk på en konkurranse for å åpne detaljsiden.
+        </p>
       </div>
-    </div>
+
+      {loading && (
+        <div className="grid gap-4">
+          <div className="h-48 animate-pulse rounded-[24px] bg-white shadow-sm" />
+          <div className="h-48 animate-pulse rounded-[24px] bg-white shadow-sm" />
+        </div>
+      )}
+
+      {!loading && competitions.length === 0 && (
+        <div className="rounded-[24px] border border-[#E3E8EA] bg-white p-6 text-center shadow-sm">
+          <p className="text-base font-medium text-[#22333B]">
+            Du er ikke påmeldt noen aktive konkurranser akkurat na.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push('/competitions')}
+            className="mt-4 rounded-full bg-[#22333B] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#17242A]"
+          >
+            Se konkurranser
+          </button>
+        </div>
+      )}
+
+      {!loading && competitions.length > 0 && (
+        <div className="grid gap-4">
+          {competitions.map((competition) => (
+            <button
+              key={String(competition.id)}
+              type="button"
+              onClick={() => router.push(`/detailPage?id=${competition.id}`)}
+              className="overflow-hidden rounded-[24px] border border-[#E3E8EA] bg-white text-left shadow-sm transition hover:border-[#CFDADF]"
+            >
+              <div className={competition.image_url ? 'grid gap-0 md:grid-cols-[1.2fr_0.8fr]' : ''}>
+                <div className="p-6">
+                  <div className="flex flex-wrap items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-xl font-semibold text-[#22333B]">
+                        {competition.name}
+                      </h3>
+                      <p className="mt-2 text-sm text-[#5C6970]">
+                        {formatDate(competition.start_date)} - {formatDate(competition.end_date)}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#ECF7F9] px-3 py-1 text-xs font-semibold text-[#38606A]">
+                      Aktiv
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-[#5C6970]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                      <Users className="h-4 w-4 text-[#7EACB5]" />
+                      {participantCounts[String(competition.id)] ?? 0} deltakere
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-[#F8FAFA] px-3 py-2">
+                      <CalendarDays className="h-4 w-4 text-[#7EACB5]" />
+                      {getSpeciesLabel(competition.species)}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-6 text-[#5C6970] md:text-base">
+                    {competition.description?.trim()
+                      ? competition.description
+                      : 'Ingen beskrivelse er lagt til for denne konkurransen ennå.'}
+                  </p>
+                </div>
+
+                {competition.image_url && (
+                  <div className="h-52 md:h-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={competition.image_url}
+                      alt={competition.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
-  

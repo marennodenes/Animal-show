@@ -18,20 +18,30 @@ export default function AdminPage() {
     const router = useRouter();
 
     const [mostPopularUser, setMostPopularUser] = useState<User | null>(null);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [popularUserLoading, setPopularUserLoading] = useState(true);
     
     useEffect(() => {
         getCurrentUser().then((user) => {
-        setCurrentUser(user);
         if (!user?.is_admin) {
             router.push("/homepage");
         }
         });
-    }, []);
+    }, [router]);
 
     useEffect(() => {
-        getMostPopularUser().then(setMostPopularUser);
+        getMostPopularUser()
+            .then(setMostPopularUser)
+            .catch((error) => {
+                console.error('Could not load most popular user:', error);
+                setMostPopularUser(null);
+            })
+            .finally(() => {
+                setPopularUserLoading(false);
+            });
     }, []);
+
+    const mostPopularUserName = mostPopularUser?.name?.trim() || 'Bruker uten navn';
+    const mostPopularUserInitial = mostPopularUserName.charAt(0).toUpperCase();
 
     return (
         <div className='fixed inset-0 flex bg-[#f5f2ef]'>
@@ -53,10 +63,12 @@ export default function AdminPage() {
                     {mostPopularUser ? (
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-full bg-[#7EACB5] flex items-center justify-center text-white font-bold text-lg shrink-0">
-                                {mostPopularUser.name.charAt(0).toUpperCase()}
+                                {mostPopularUserInitial}
                             </div>
-                            <p className="text-gray-700 font-medium text-lg">{mostPopularUser.name}</p>
+                            <p className="text-gray-700 font-medium text-lg">{mostPopularUserName}</p>
                         </div>
+                    ) : !popularUserLoading ? (
+                        <p className="text-sm text-gray-500">Fant ingen populær bruker å vise akkurat nå.</p>
                     ) : (
                         <div className="flex items-center gap-2 text-gray-400">
                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
