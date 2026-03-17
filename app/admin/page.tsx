@@ -44,7 +44,7 @@ export default function AdminPage() {
     const mostPopularUserInitial = mostPopularUserName.charAt(0).toUpperCase();
 
     return (
-        <div className='fixed inset-0 flex bg-[#f5f2ef]'>
+        <div className='fixed inset-0 flex bg-[var(--background)]'>
             <Sidebar/>
             <main className='flex-1 ml-50 overflow-y-auto px-8 py-10'>
                 <h1 className="text-3xl font-bold mb-6 text-gray-800">Admin Page</h1>

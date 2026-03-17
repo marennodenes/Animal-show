@@ -64,7 +64,7 @@ export default function RegisterForm() {
     <div className="w-full max-w-md mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-[#f5f2ef] dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+        className="bg-[var(--background)] dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
       >
         <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-50">
           Registrer deg

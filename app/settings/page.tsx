@@ -19,7 +19,7 @@ export default async function SettingsPage() {
     .single();
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
+    <div className="min-h-screen bg-[var(--background)] py-10">
       <SettingsForm userEmail={user.email || ''}
        userId={user.id}
        initialName={userData?.name || ''}

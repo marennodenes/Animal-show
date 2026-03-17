@@ -111,7 +111,7 @@ export default function Home() {
     : [];
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#f6efe8]">
+    <div className="fixed inset-0 overflow-hidden bg-[var(--background)]">
       <Sidebar />
 
       <main className="relative ml-50 h-full overflow-y-auto">
