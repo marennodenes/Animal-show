@@ -1,0 +1,2 @@
+# Use of AI tools
+In our project we utilized AI tools to enhance efficiency and maintain consistency in our code. Specifically we used GitHub Copilot, Claude and OpenAI Codex. These tools helped us fine tune the interface and styling, while also ensuring overall consistency across the project. All suggestions from AI were looked over and adapted by us to ensure that the code fit our design standards and that the code remained consistent.
