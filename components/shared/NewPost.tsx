@@ -52,48 +52,55 @@ export default function NewPost({
   // Fetch all competitions from backend
   useEffect(() => {
     const fetchAnimals = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const animals = await getUserAnimals(user.id);
-    setUserAnimals(animals);
-  };
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const animals = await getUserAnimals(user.id);
+      setUserAnimals(animals);
+    };
 
-  const fetchCompetitions = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const result = await getCompetitionByUser(user.id, 'active');
-    if (result.success) {
-      // extract competitions and filter out null
-      const comps = (result.data || [])
-        .map((item: any) => item.Competition)
-        .filter((comp: any) => comp !== null);
-      setCompetitions(comps);
-    }
-  };
+    const fetchCompetitions = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const result = await getCompetitionByUser(user.id, 'active');
+      if (result.success) {
+        // extract competitions and filter out null
+        const comps = (result.data || [])
+          .map((item: any) => item.Competition)
+          .filter((comp: any) => comp !== null);
+        setCompetitions(comps);
+      }
+    };
 
-  fetchAnimals();
-  fetchCompetitions();
-}, []);
-  
-  const animalOptions = userAnimals.map(animal => ({
-  value: animal.id,   
-  label: animal.name,
-}));
+    fetchAnimals();
+    fetchCompetitions();
+  }, []);
 
-const competitionOptions = competitions.map(comp => ({
-  value: comp.id,
-  label: comp.name,
-}));
-// Find the selected competition object for display
-const selectedCompetitionObj = competitions.find(
+  // Find the selected competition object for display
+  const selectedCompetitionObj = competitions.find(
     (comp) => comp.id === selectedCompetition
   );
 
+  const animalOptions = userAnimals
+    .filter(animal => {
+      if (!selectedCompetitionObj?.species) return true;
+      if (selectedCompetitionObj.species === 'mixed') return true;
+      return animal.species === selectedCompetitionObj.species;
+    })
+    .map(animal => ({
+      value: animal.id,
+      label: animal.name,
+    }));
+
+  const competitionOptions = competitions.map(comp => ({
+    value: comp.id,
+    label: comp.name,
+  }));
+
   const canPublish = selectedAnimal !== "" && selectedCompetition !== "";
 
-return (
+  return (
     <>
       {/* Floating red button to open modal */}
       <button
@@ -138,7 +145,7 @@ return (
                 />
               )}
 
-              {/* Dropdown for selecting dog */}
+              {/* Dropdown for selecting animal */}
               <DropdownInput
                 label="Legg til kjæledyr"
                 value={selectedAnimal}
