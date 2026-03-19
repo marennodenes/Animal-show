@@ -28,11 +28,13 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="mb-4 ">
         <Image 
-          src="/Logo.png" 
+          src="/images/Logo1.svg" 
           alt="Poteshow logo" 
           width={150} 
           height={150}
-          className="w-full h-full object-contain"
+          className="opacity-90"
+
+
         />
       </div>
       
