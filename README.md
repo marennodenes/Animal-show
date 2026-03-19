@@ -1,7 +1,4 @@
 
-# Quick setup
-The website is deployed with vercel, via the url: https://tdt-4140-prosjekt-jov2.vercel.app/login
-To get all the different features on the website, the logged in user needs to be an admin account. An Admin account has already been created for you. Email: admin@user.com Password: adminuser
 # How to launch
 ## Install npm
 ```bash
