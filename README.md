@@ -30,7 +30,7 @@ The website is designed for light mode, so for the best possible user experience
 - The lib folder contains logic and functions that aren't direclty UI. This is currently used for Business Logic, API calls, database operations and user authentication.  
 # Screen Shots
 
-## Log In Page
+## Login Page
 <text style="font-size: 18px;"> Log in page allowing the user to log in, or register if they dont already have an account </text>
 
 <br><img src="public/images/loginPage.png" alt="loginpage" width="520"><br>
