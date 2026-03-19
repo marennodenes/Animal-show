@@ -45,64 +45,47 @@ export default function NewPost({
     const loadOptions = async () => {
       setIsLoadingOptions(true);
 
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user) {
+        if (!user) {
+          return;
+        }
+
+        const [animals, competitionResult] = await Promise.all([
+          getUserAnimals(user.id),
+          getCompetitionByUser(user.id, "active"),
+        ]);
+
+        if (!isActive) {
+          return;
+        }
+
+        const activeCompetitions = competitionResult.success
+          ? ((competitionResult.data ?? []) as CompetitionUserRow[])
+              .map((item) => item.Competition)
+              .filter((competition): competition is Competition => competition !== null)
+          : [];
+
+        setUserAnimals(animals);
+        setCompetitions(activeCompetitions);
+        setHasLoadedOptions(true);
+      } finally {
         if (isActive) {
           setIsLoadingOptions(false);
         }
-        return;
-      }
-
-      const [animals, competitionResult] = await Promise.all([
-        getUserAnimals(user.id),
-        getCompetitionByUser(user.id, "active"),
-      ]);
-
-      if (!isActive) {
-        return;
-      }
-
-      const activeCompetitions = competitionResult.success
-        ? ((competitionResult.data ?? []) as CompetitionUserRow[])
-            .map((item) => item.Competition)
-            .filter((competition): competition is Competition => competition !== null)
-        : [];
-
-      setUserAnimals(animals);
-    };
-
-    fetchAnimals();
-  }, []);
-
-  // Fetch all competitions from backend
-  useEffect(() => {
-    const fetchAnimals = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const animals = await getUserAnimals(user.id);
-      setUserAnimals(animals);
-    };
-
-    const fetchCompetitions = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const result = await getCompetitionByUser(user.id, 'active');
-      if (result.success) {
-        // extract competitions and filter out null
-        const comps = (result.data || [])
-          .map((item: any) => item.Competition)
-          .filter((comp: any) => comp !== null);
-        setCompetitions(comps);
       }
     };
 
-    fetchAnimals();
-    fetchCompetitions();
-  }, []);
+    loadOptions();
+
+    return () => {
+      isActive = false;
+    };
+  }, [hasLoadedOptions, isOpen]);
 
   // Find the selected competition object for display
   const selectedCompetitionObj = competitions.find(
@@ -202,10 +185,14 @@ export default function NewPost({
                     (animal) => animal.id === selectedAnimal
                   );
 
+                  if (!selectedAnimalObj) {
+                    return;
+                  }
+
                   await addAnimalToCompetition(
                     selectedAnimal,
                     selectedCompetition,
-                    selectedAnimalObj?.species,
+                    selectedAnimalObj.species,
                     postContent
                   );
                   setIsOpen(false);

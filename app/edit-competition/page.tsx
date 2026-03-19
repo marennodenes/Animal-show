@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CopyWright from '@/components/shared/CopyRight';
 import Sidebar from '@/components/shared/Sidebar';
 import EditCompetitionForm from '@/components/CompetitionPage/EditCompetitionForm';
 import { isLoggedIn } from '@/lib/auth';
 
-export default function EditCompetitionPage() {
+function EditCompetitionPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const competitionId = searchParams.get('id') ?? '';
@@ -44,5 +44,13 @@ export default function EditCompetitionPage() {
       </main>
       <CopyWright />
     </div>
+  );
+}
+
+export default function EditCompetitionPage() {
+  return (
+    <Suspense fallback={null}>
+      <EditCompetitionPageContent />
+    </Suspense>
   );
 }

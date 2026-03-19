@@ -1,14 +1,13 @@
 "use client"
 
+import { Suspense, useEffect, useState } from 'react';
 import Sidebar from '@/components/shared/Sidebar';
 import CopyWright from '@/components/shared/CopyRight';
 import CompetitionDetail from '@/components/detailPage/CompetitionDetail';
 import NewPost from '@/components/shared/NewPost';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
 import { getCurrentUser } from '@/lib/auth';
 import { userInCompetition, getCompetitionById } from '@/lib/competition';
-import { useEffect } from 'react';
 
 /**
  * Create Competition Page
@@ -17,7 +16,7 @@ import { useEffect } from 'react';
  * @author bragesbr
  */
 
-export default function DetailPage() {
+function DetailPageContent() {
     const searchParams = useSearchParams();
     const competitionId = searchParams.get("id") ?? "";
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -93,5 +92,13 @@ export default function DetailPage() {
       </main>
       <CopyWright />
     </div>
+  );
+}
+
+export default function DetailPage() {
+  return (
+    <Suspense fallback={null}>
+      <DetailPageContent />
+    </Suspense>
   );
 }

@@ -11,19 +11,21 @@
   --coral: #bf4646;
   --coral-soft: #fff0ea;
   --shadow-soft: 0 18px 55px rgba(68, 47, 36, 0.12);
+  --font-sans: "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .auth-pattern-bg {

@@ -34,7 +34,7 @@ export default function CreateCompetitionForm({ userID }: CreateCompetitionFormP
   const [loading, setLoading] = useState(false);
 
   type AnimalType = 'dog' | 'cat' | 'mixed';
-  const [selectedPet, setSelectedPet] = useState<AnimalType>('dog'); // Default to 'dog'
+  const [selectedPet, setSelectedPet] = useState<AnimalType | ''>('');
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPet(event.target.value as AnimalType | '');
