@@ -49,10 +49,7 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-2xl border border-black/5 bg-white/95 px-8 pb-8 pt-6 shadow-xl backdrop-blur-sm"
-      >
+      <form onSubmit={handleSubmit} className="bg-[#f5f2ef] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
         <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900">
           Logg inn
         </h2>
