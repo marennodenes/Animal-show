@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex bg-[#f5f2ef]">
+      <div className="fixed inset-0 flex bg-[var(--background)]">
         <Sidebar />
         <main className="flex-1 p-8 ml-50 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
@@ -76,7 +76,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="fixed inset-0 flex bg-[#f5f2ef]">
+    <div className="fixed inset-0 flex bg-[var(--background)]">
       <Sidebar />
       <main className="flex-1 p-8 ml-50 overflow-y-auto">
         <ProfileForm 

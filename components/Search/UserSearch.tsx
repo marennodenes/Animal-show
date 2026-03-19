@@ -11,6 +11,9 @@ interface UserSearchProps {
   placeholder?: string;
   limit?: number;
   compact?: boolean;
+  headingLevel?: 'h1' | 'h2';
+  className?: string;
+  noWrapper?: boolean;
 }
 
 export default function UserSearch({
@@ -19,7 +22,11 @@ export default function UserSearch({
   placeholder = 'Søk etter brukernavn...',
   limit = 8,
   compact = false,
+  headingLevel = 'h1',
+  className = '',
+  noWrapper = false,
 }: UserSearchProps) {
+  const HeadingTag = headingLevel;
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchUserResult[]>([]);
@@ -84,96 +91,108 @@ export default function UserSearch({
     };
   }, [query, currentUserId, limit]);
 
-  const hasQuery = query.trim().length > 0;
-
-  return (
-    <section className={`w-full ${compact ? 'max-w-3xl mx-auto' : 'max-w-4xl mx-auto'}`}>
-      <div className={`rounded-[28px] border border-[#D9E3E6] bg-white shadow-sm ${compact ? 'p-5 md:p-6' : 'p-6 md:p-8'}`}>
+  const searchContent = (
+    <>
+      {title && (
         <div className="mb-5">
-          <h1 className={`${compact ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900`}>
+          <HeadingTag className={`${compact ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900`}>
             {title}
-          </h1>
+          </HeadingTag>
           <p className="mt-2 text-sm md:text-base text-gray-600">
             {description}
           </p>
         </div>
+      )}
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7EACB5]" />
-          <input
-            type="text"
-            value={query}
-            onChange={(event) => {
-              const nextQuery = event.target.value;
-              setQuery(nextQuery);
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7EACB5]" />
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => {
+            const nextQuery = event.target.value;
+            setQuery(nextQuery);
 
-              if (!nextQuery.trim()) {
-                setResults([]);
-                setError('');
-                setSearching(false);
-              }
-            }}
-            placeholder={placeholder}
-            className="w-full rounded-2xl border border-[#D9E3E6] bg-[#F7FAFB] py-3 pl-12 pr-4 text-gray-900 outline-none transition focus:border-[#7EACB5] focus:bg-white"
-          />
-        </div>
+            if (!nextQuery.trim()) {
+              setResults([]);
+              setError('');
+              setSearching(false);
+            }
+          }}
+          placeholder={placeholder}
+          className="w-full rounded-2xl border border-[#D9E3E6] bg-[#F7FAFB] py-3 pl-12 pr-4 text-gray-900 outline-none transition focus:border-[#7EACB5] focus:bg-white"
+        />
+      </div>
 
-        <div className="mt-5 space-y-3">
-          {searching && (
-            <div className="rounded-2xl border border-[#E6ECEE] bg-[#F9FBFB] px-4 py-5 text-sm text-gray-500">
-              Søker etter brukere..
+      <div className="mt-5 space-y-3">
+        {searching && (
+          <div className="rounded-2xl border border-[#E6ECEE] bg-[#F9FBFB] px-4 py-5 text-sm text-gray-500">
+            Søker etter brukere..
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-2xl border border-[#F2C7C7] bg-[#FFF5F5] px-4 py-5 text-sm text-[#A03A3A]">
+            {error}
+          </div>
+        )}
+
+        {results.map((user) => (
+          <button
+            key={user.id}
+            type="button"
+            onClick={() => router.push(`/profile/${user.id}`)}
+            className="flex w-full items-start gap-4 rounded-2xl border border-[#E6ECEE] bg-[#F9FBFB] p-4 text-left transition hover:border-[#C9D8DC] hover:bg-white"
+          >
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#D8E8EB] text-lg font-semibold text-[#38606A]">
+              {user.image_url ? (
+                // User images come from storage URLs, so a regular img keeps this simple.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.image_url}
+                  alt={user.name ?? 'User profile picture'}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span>{(user.name ?? 'U').charAt(0).toUpperCase()}</span>
+              )}
             </div>
-          )}
 
-          {error && (
-            <div className="rounded-2xl border border-[#F2C7C7] bg-[#FFF5F5] px-4 py-5 text-sm text-[#A03A3A]">
-              {error}
-            </div>
-          )}
-
-          {results.map((user) => (
-            <button
-              key={user.id}
-              type="button"
-              onClick={() => router.push(`/profile/${user.id}`)}
-              className="flex w-full items-start gap-4 rounded-2xl border border-[#E6ECEE] bg-[#F9FBFB] p-4 text-left transition hover:border-[#C9D8DC] hover:bg-white"
-            >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#D8E8EB] text-lg font-semibold text-[#38606A]">
-                {user.image_url ? (
-                  // User images come from storage URLs, so a regular img keeps this simple.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.image_url}
-                    alt={user.name ?? 'User profile picture'}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span>{(user.name ?? 'U').charAt(0).toUpperCase()}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-base font-semibold text-gray-900">
+                  {user.name || 'User without username'}
+                </p>
+                {user.is_admin && (
+                  <span className="rounded-full bg-[#FDECEC] px-2.5 py-1 text-xs font-medium text-[#BF4646]">
+                    Admin
+                  </span>
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-base font-semibold text-gray-900">
-                    {user.name || 'User without username'}
-                  </p>
-                  {user.is_admin && (
-                    <span className="rounded-full bg-[#FDECEC] px-2.5 py-1 text-xs font-medium text-[#BF4646]">
-                      Admin
-                    </span>
-                  )}
-                </div>
+              <p className="mt-1 text-sm text-gray-600">
+                {user.bio || 'Ingen bio lagt til.'}
+              </p>
+              <p className="mt-2 text-sm font-medium text-[#7EACB5]">
+                Vis profil
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </>
+  );
 
-                <p className="mt-1 text-sm text-gray-600">
-                  {user.bio || 'Ingen bio lagt til.'}
-                </p>
-                <p className="mt-2 text-sm font-medium text-[#7EACB5]">
-                  Vis profil
-                </p>
-              </div>
-            </button>
-          ))}
-        </div>
+  if (noWrapper) {
+    return <div className={className}>{searchContent}</div>;
+  }
+
+  return (
+    <section
+      className={`w-full ${compact ? 'max-w-3xl mx-auto' : 'max-w-4xl mx-auto'} ${className}`}
+    >
+      <div className={`rounded-[28px] border border-[#D9E3E6] bg-white shadow-sm ${compact ? 'p-5 md:p-6' : 'p-6 md:p-8'}`}>
+        {searchContent}
       </div>
     </section>
   );

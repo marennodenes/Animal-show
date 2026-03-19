@@ -68,11 +68,14 @@ export default function CommentsPage({
         const loadComments = async () => {
             const fetchedComments = await getComments(animal_id, competition_id);
             setComments(fetchedComments);
-            onCommentCountChange?.(fetchedComments.length);
         };
 
         void loadComments();
-    }, [animal_id, competition_id, onCommentCountChange]);
+    }, [animal_id, competition_id]);
+
+    useEffect(() => {
+        onCommentCountChange?.(comments.length);
+    }, [comments.length, onCommentCountChange]);
 
     const getDisplayName = (comment: Comment) => {
         if (comment.user_name?.trim()) {
@@ -94,17 +97,12 @@ export default function CommentsPage({
         setNewComment("");
         const fetchedComments = await getComments(animal_id, competition_id);
         setComments(fetchedComments);
-        onCommentCountChange?.(fetchedComments.length);
     };
 
     const handleDeleteComment = async (comment_id: string) => {
         if (!currentUser) return;
         await deleteComment(currentUser.id, comment_id);
-        setComments((prev) => {
-            const updatedComments = prev.filter((c) => c.id !== comment_id);
-            onCommentCountChange?.(updatedComments.length);
-            return updatedComments;
-        });
+        setComments((prev) => prev.filter((c) => c.id !== comment_id));
     };
 
     return (

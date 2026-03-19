@@ -24,7 +24,7 @@ interface AddAnimalFormProps {
 /**
  * Form component for adding a new animal to the user's profile
  */
-export default function addAnimalForm({ userId }: AddAnimalFormProps) {
+export default function AddAnimalForm({ userId }: AddAnimalFormProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
