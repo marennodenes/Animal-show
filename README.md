@@ -1,3 +1,5 @@
+# Quickstart
+The project is uploaded to vercel, and can be view on this link: https://pu-prosjekt-vercel-ps6p.vercel.app/login 
 
 # How to launch
 ## Install npm
