@@ -89,7 +89,7 @@ export default function LoginForm() {
           </button>
         </div>
 
-        <div className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="mt-4 text-center text-sm text-zinc-600">
           Har du ikke konto?{' '}
           <Link href="/register" className="font-bold text-[#7EACB5] hover:text-[#6898A5]">
             Registrer deg
