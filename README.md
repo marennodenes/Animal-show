@@ -20,7 +20,6 @@ npm run dev
 ### Visiting the website
 To use the website go to http://localhost:3000/
 You can log in with the same admin account as detailed above, or create a new account if you do not want admin features.
-The website is not made for dark mode, so for best possible experience use white mode.
 ## Module Setup
 ### App
 -  The app folder has folders for each page. This is used to import a component and display it as a page.
@@ -32,37 +31,41 @@ The website is not made for dark mode, so for best possible experience use white
 
 ### Log In Page
 Log in page allowing the user to log in, or register if they dont already have an account
-![log-in-page](image-4.png)
+![loginpage](public/images/image.png)
 ### Register Page
 Register page allowing users to create an account.
-![register-page](image-5.png)
+![register](public/images/image-1.png)
 
 ### Home Page
 Home page where you can view all upcoming competitions that you are participating in. 
 You can also click on the competitions which will lead you to the detail page.
 There is also a search function that allows you to search and view other user profiles.
-![homepage](image-3.png)
+![home page](public/images/image-2.png)
 New post button allows user to post an image into a competition.
 ### Profile page
-![Profile page](image.png)
+![profile page](public/images/image-5.png)
 Profile page displaying users profile picture, bio and their animals
-![alt text](image-1.png)
 Pressing legg til text allows user to add another animal to their profile.
 ### Competitions page
 The competititons shows all active, upcoming and finished competitions. If the user is an admin they can create competitions.
-![competitions-page-active](image-2.png)
-![competitons-upcoming](image-6.png)
-![create-competition](image-7.png)
+You can also click on each competitions and view competitors. The page also allows administrators to moderate content.
+Users are also allowed to comment and like posts in competitions they are apart of.
+![competitions-page](public/images/image-6.png)
+![competitions-upcoming](public/images/image-10.png)
+![competitions-finished-winner](public/images/image-11.png)
+![add-competition](public/images/image-7.png)
+![view-competition](public/images/image-8.png)
+![comments](public/images/image-9.png)
 ###  Search page
 The search page allows users to search up other profiles and view their pages.
-![Search-page](image-10.png)
-![viewing profile](image-11.png)
+![search page](public/images/image-3.png)
+![viewing profile](public/images/image-4.png)
 ### Settings page
 The settings page allows the user to change their profile picture, name, bio and password.
-![settings page](image-8.png)
-### Admin moderating
-Admin accounts have permission to modify and delete content. This includes the ability to delete posts, as well as delete and edit competitions.
-![moderating](image-9.png)
-## Admin page
+![settings page](public/images/image-12.png)
+### Admin page
 The administrator page shows relevant statistics about the website. This includes users made over time, competitions over time and the most popular account by likes.
-![administrator page](image-12.png)
+![admin page](public/images/image-13.png)
+### Sidebar
+The sidebar shows available pages.
+![sidebar](public/images/image-14.png)
