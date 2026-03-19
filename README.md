@@ -20,6 +20,7 @@ npm run dev
 ## Visiting the website
 To use the website go to http://localhost:3000/
 You can log in with the same admin account as detailed above, or create a new account if you do not want admin features.
+The website is designed for light mode, so for the best possible user experience, you should enable light mode on your computer.
 # Module Setup
 ## App
 -  The app folder has folders for each page. This is used to import a component and display it as a page.
