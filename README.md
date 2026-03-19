@@ -33,14 +33,14 @@ The website is designed for light mode, so for the best possible user experience
 ## Log In Page
 <text style="font-size: 18px;"> Log in page allowing the user to log in, or register if they dont already have an account </text>
 
-<br><img src="public/images/image.png" alt="loginpage" width="800"><br>
+<br><img src="public/images/loginPage.png" alt="loginpage" width="520"><br>
 
 
 ## Register Page
 <text style="font-size: 18px;"> Register page allowing users to create an account. </text>
 
 <br>
-<img src="public/images/image-1.png" alt="register" width="800">
+<img src="public/images/registerPage.png" alt="register" width="520">
 <br>
 
 ## Home Page
@@ -50,7 +50,7 @@ There is also a search function that allows you to search and view other user pr
 New post button allows user to post an image into a competition. </text>
 
 <br>
-<img src="public/images/image-2.png" alt="dashboard" width="800">
+<img src="public/images/homepage.png" alt="home page" width="520">
 <br>
 
 ## Profile page
@@ -58,7 +58,7 @@ New post button allows user to post an image into a competition. </text>
 Pressing legg til text allows user to add another animal to their profile. </text>
 
 <br>
-<img src="public/images/image-5.png" alt="dashboard" width="800">
+<img src="public/images/profilepage.png" alt="profile page" width="520">
 <br>
 
 ## Competitions page
@@ -67,51 +67,48 @@ You can also click on each competitions and view competitors. The page also allo
 Users are also allowed to comment and like posts in competitions they are apart of. </text>
 
 <br>
-<img src="public/images/image-6.png" alt="dashboard" width="800">
+<img src="public/images/competitionList.png" alt="competition list" width="520">
 <br>
 <br>
-<img src="public/images/image-10.png" alt="dashboard" width="800">
+<img src="public/images/upcomingCompetitions.png" alt="upcoming competitions" width="520">
 <br>
 <br>
-<img src="public/images/image-11.png" alt="dashboard" width="800">
+<img src="public/images/makeCompetition.png" alt="create competition" width="520">
 <br>
 <br>
-<img src="public/images/image-7.png" alt="dashboard" width="800">
+<img src="public/images/competition.png" alt="competition details" width="520">
 <br>
 <br>
-<img src="public/images/image-8.png" alt="dashboard" width="800">
-<br>
-<br>
-<img src="public/images/image-9.png" alt="dashboard" width="800">
+<img src="public/images/competitionWithComments.png" alt="competition comments" width="520">
 <br>
 
 ##  Search page
 <text style="font-size: 18px;"> The search page allows users to search up other profiles and view their pages.</text>
 
 <br>
-<img src="public/images/image-3.png" alt="dashboard" width="800">
+<img src="public/images/Search.png" alt="search page" width="520">
 <br>
 <br>
-<img src="public/images/image-4.png" alt="dashboard" width="800">
+<img src="public/images/userSearch.png" alt="user search results" width="520">
 <br>
 
 ## Settings page
 <text style="font-size: 18px;">The settings page allows the user to change their profile picture, name, bio and password. </text>
 
 <br>
-<img src="public/images/image-12.png" alt="dashboard" width="800">
+<img src="public/images/settings.png" alt="settings page" width="520">
 <br>
 
 ## Admin page
 <text style="font-size: 18px;"> The administrator page shows relevant statistics about the website. This includes users made over time, competitions over time and the most popular account by likes. </text>
 
 <br>
-<img src="public/images/image-13.png" alt="dashboard" width="800">
+<img src="public/images/adminDashboard.png" alt="admin dashboard" width="520">
 <br>
 
 ## Sidebar
 <text style="font-size: 18px;"> The sidebar shows available pages. </text>
 
 <br>
-<img src="public/images/image-14.png" alt="dashboard" width="400">
+<img src="public/images/sidebar.png" alt="sidebar" width="160">
 <br>
