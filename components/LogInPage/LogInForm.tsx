@@ -49,8 +49,8 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="bg-[#f5f2ef] dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-        <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-50">
+      <form onSubmit={handleSubmit} className="bg-[#f5f2ef] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
+        <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900">
           Logg inn
         </h2>
 
@@ -86,7 +86,7 @@ export default function LoginForm() {
           </button>
         </div>
 
-        <div className="mt-4 text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="mt-4 text-center text-sm text-zinc-600">
           Har du ikke konto?{' '}
           <Link href="/register" className="font-bold text-[#7EACB5] hover:text-[#6898A5]">
             Registrer deg

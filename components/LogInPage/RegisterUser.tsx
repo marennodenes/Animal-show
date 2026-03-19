@@ -64,9 +64,9 @@ export default function RegisterForm() {
     <div className="w-full max-w-md mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="bg-[#f5f2ef] dark:bg-zinc-900 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
+        className="bg-[#f5f2ef] shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900 dark:text-zinc-50">
+        <h2 className="text-2xl font-bold mb-6 text-center text-zinc-900">
           Registrer deg
         </h2>
 
@@ -113,7 +113,7 @@ export default function RegisterForm() {
             {loading ? 'Registrerer...' : 'Registrer deg'}
           </button>
 
-          <p className="text-center text-zinc-600 dark:text-zinc-400 text-sm">
+          <p className="text-center text-zinc-600 text-sm">
             Har du allerede konto?{' '}
             <Link href="/login" className="text-[#7EACB5] hover:text-[#6898A5] font-bold">
               Logg inn
